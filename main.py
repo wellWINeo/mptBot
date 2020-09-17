@@ -98,8 +98,7 @@ class mptPage:
     def getSheduleByDay(self, group, targetDay):
         tmp = []
         dayNum = 0
-        #bodies = self.naviToGroup(group).find_all("tr")
-        bodies = self.page.body.main.find(id="specRasp7dc1be19b61fe30104b8c13952e2e8f2").find_all("tr")
+        bodies = self.naviToGroup(group).find_all("tr")
         for i in range(0, len(bodies) - 1):
             if dayNum == targetDay:
                 while True:
@@ -109,7 +108,7 @@ class mptPage:
                         tmp.pop(0)
                         return tmp
             else:
-                if self._checkTHead(bodies[i].text):
+                if self._checkTHead(bodies[i]):
                     dayNum+= 1
 
 
