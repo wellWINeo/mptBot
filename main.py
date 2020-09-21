@@ -102,7 +102,12 @@ class mptPage:
         for i in range(0, len(bodies) - 1):
             if dayNum == targetDay:
                 while True:
-                    tmp.append(bodies[i].text)
+                    #TODO
+                    #tmp.append(bodies[i].td.text)
+                    lesson = bodies[i].find_all("td")
+                    tmp.append([])
+                    for elem in lesson:
+                        tmp[len(tmp) - 1].append(elem.text)
                     i+= 1
                     if i >= len(bodies) or self._checkTHead(bodies[i]):
                         tmp.pop(0)
@@ -112,7 +117,7 @@ class mptPage:
                     dayNum+= 1
 
 
-    def getHeader(self, branch, group, day):
+    def getHeader(self, group, day):
         #response = self.page.body.main.find(id=self.groups[branch]["groupsList"][group])
         response = self.naviToGroup(group)
         return response.find_all("thead")[day].h4.text 
