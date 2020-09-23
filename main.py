@@ -2,84 +2,53 @@ import bs4
 import requests
 
 class mptPage:
-    page = ""
+    """
+    Class for parsing data from mpt.ru
 
-    groups09_02_01 = {
-        "Э-1-17" : "specRaspadfee2051545f62df0f88505ac8f0682"
-    }
+    ----------------------
+    Attributes:
+    pageShedule -- store the soup of https://mpt.ru/studentu/raspisanie-zanyatiy/
+    pageChanges -- store the soup of https://mpt.ru/studentu/izmeneniya-v-raspisanii
 
-    groups09_02_02 = None
-    groups09_02_03 = None
-    groups09_02_04 = None
-    groups09_02_05 = None
-    groups09_02_06 = None
-    groups09_02_07 = {
-        "П50-2-19" : "specRasp7dc1be19b61fe30104b8c13952e2e8f2"
-    }
-    groups10_02_03 = None
-    groups10_02_05 = None
-    groups40_02_01 = None
-    groups1 = None
-
-
-    groups = {
-        "09.02.01" : {
-            "divId" : "speca19dced47c9224424b0ac966f5fa147c",
-            "groupsList" : groups09_02_01
-        },
-        "09.02.02" : {
-            "divId" : "spec278dff28f9f8331e6aa7a977e9def941",
-            "groupsList" : groups09_02_02
-        },
-        "09.02.03" : {
-            "divId" : "speca19f2e7a69c0c4b50866f3fbcff83a73",
-            "groupsList" : groups09_02_03
-        },
-        "09.02.04" : { 
-            "divid" : "spec6a8424929b16ee75085830c77022cdbf",
-            "groupslist" : groups09_02_04
-        },
-        "09.02.05" : {
-            "divId" : "speca43f8d8437b13281f50038a0cb195696",
-            "groupsList" : groups09_02_05
-        },
-        "09.02.06" : {
-            "divid" : "speca8def7fcfc1932705d763fc48b81c9e8",
-            "groupslist" : groups09_02_06
-        },
-        "09.02.07" : {
-            "divid" : "specf7d56bc1e8c0415bc1a88b8bf4982a61",
-            "groupsList" : groups09_02_07
-        },
-        "10.02.03" : { 
-            "divId" : "spec3b4bef2daf9a2b4e38c3044ce1dae3a9",
-            "groupsList" : groups10_02_03
-        }, 
-        "10.02.05" : {
-            "divId" : "spece163b71104f4296c734f51fb8b8c3d2a",
-            "groupsList" : groups10_02_05
-        },
-        "40.02.01" : {
-            "divId" : "specbabe789cf6617aaccbf20389e8dfbd32",
-            "groupsList" : groups40_02_01
-        },
-        "1" : {
-            "divId" : "spece13a3927293dba1001e09b3a971215c3",
-            "groupsList" : groups1
-        }
-    }
+    ----------------------
+    Methods
     
-    def __init__(self): 
-        self.page = requests.get("https://mpt.ru/studentu/raspisanie-zanyatiy/") 
-        self.page = bs4.BeautifulSoup(self.page.text, "html.parser")   
+    getWeekCount(None)
+        Return is week odd
     
+    getShedyleByDay(group, targetDay)
+        Return matrix with shedule of the group by this day
+
+    getHeader(group, day)
+        Return name of week's day
+    """
+    pageShedule = ""
+    pageChanges = ""
+
     
-    def getWeekCount(self): 
-        return self.page.body.main.find("span", class_ = "label label-info")
+    def __init__(self):
+        """
+        Constructor for mptPage class
+
+        ----------------------
+        Params:
+        None
+        """ 
+        self.pageShedule = requests.get("https://mpt.ru/studentu/raspisanie-zanyatiy/") 
+        self.pageChanges = requests.get("https://mpt.ru/studentu/izmeneniya-v-raspisanii")
+
+        self.pageShedule = bs4.BeautifulSoup(self.pageShedule.text, "html.parser")   
+        self.pageChanges = bs4.BeautifulSoup(self.pageChanges.text, "html.parser")
+    
+    def getWeekCount(self):
+        """Returns count of current week (числитель/знаменатель) """
+
+        return self.pageShedule.body.main.find("span", class_ = "label label-info")
 
 
-    def naviToGroup(self, group):
-        divs = self.page.body.main.find_all("div", {"class" : "tab-pane"})
+    def _naviToGroup(self, group):
+        """Privete method for navigation in soup to group (for shedule)"""
+        divs = self.pageShedule.body.main.find_all("div", {"class" : "tab-pane"})
         group = "Группа " + group
         for div in divs:
             if div.find("h3").text == group:
@@ -87,7 +56,19 @@ class mptPage:
         return None
 
 
+    def _naviToGroupChanges(self, group):
+        """Private method for navigation in soup to group (for changes)"""
+        
+        divs = self.pageChanges.find_all("div", {"class" : "table-responsive"})
+        for div in divs:
+            if div.caption.b.text == group:
+                return div
+            else:
+                pass
+        return None
+
     def _checkTHead(self, point):
+        """Private method for checking THead, return bool value"""
         try:
             if point.thead.th.h4.text != None:
                 return True
@@ -96,14 +77,22 @@ class mptPage:
 
 
     def getSheduleByDay(self, group, targetDay):
+        """Method to get the shedule for day by group
+        ----------------------
+        Params:
+        group     -- string with correct name of group, like it typed on the site
+        targetDay -- number of the day week, starts by 1 
+        ----------------------
+        Returns:
+        matrix like this -> [[num1, name1, teacher1], [num2, name2, teacher2] ...]
+        """
+        
         tmp = []
         dayNum = 0
-        bodies = self.naviToGroup(group).find_all("tr")
+        bodies = self._naviToGroup(group).find_all("tr")
         for i in range(0, len(bodies) - 1):
             if dayNum == targetDay:
                 while True:
-                    #TODO
-                    #tmp.append(bodies[i].td.text)
                     lesson = bodies[i].find_all("td")
                     tmp.append([])
                     for elem in lesson:
@@ -118,13 +107,15 @@ class mptPage:
 
 
     def getHeader(self, group, day):
-        #response = self.page.body.main.find(id=self.groups[branch]["groupsList"][group])
-        response = self.naviToGroup(group)
+        """Returns string with day of the week name
+        ----------------------
+        Params:
+        group -- string with correct name of group, like it typed on the site
+        day   -- number of the day week, starts by 1"""
+        response = self._naviToGroup(group)
         return response.find_all("thead")[day].h4.text 
 
 
 if __name__ == "__main__":
     mpt = mptPage()
-    #print(mpt.groups["09.02.07"]["groupsList"]["П50-2-19"])
-    print(mpt.getSheduleByDay("П50-2-19", 5))
-    
+    print(mpt._naviToGroupChanges("П50-2-19")) 
