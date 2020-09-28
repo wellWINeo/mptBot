@@ -60,6 +60,7 @@ class mptPage:
         """Private method for navigation in soup to group (for changes)"""
         
         divs = self.pageChanges.find_all("div", {"class" : "table-responsive"})
+        
         for div in divs:
             if div.caption.b.text == group:
                 return div
@@ -74,6 +75,24 @@ class mptPage:
                 return True
         except:
             return False
+
+    
+    def getChangesByDay(self, group):
+        
+        tmp = self._naviToGroupChanges(group).find_all("tr")
+        response = []
+        
+        for elem in tmp:
+            response.append([
+                elem.find(class_ = "lesson-number").text,
+                elem.find(class_ = "replace-from").text,
+                elem.find(class_ = "replace-to").text,
+                elem.find(class_ = "updated-at").text
+            ])
+        return response[1:]
+
+
+
 
 
     def getSheduleByDay(self, group, targetDay):
@@ -118,4 +137,5 @@ class mptPage:
 
 if __name__ == "__main__":
     mpt = mptPage()
-    print(mpt._naviToGroupChanges("П50-2-19")) 
+
+    print(mpt.getChangesByDay("ВД50-3-19"))
