@@ -1,2 +1,4 @@
 #for ignoring swp files (e.g. vim)
 *.swp
+
+*.vim

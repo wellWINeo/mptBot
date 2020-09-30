@@ -79,7 +79,13 @@ class mptPage:
     
     def getChangesByDay(self, group):
         
-        tmp = self._naviToGroupChanges(group).find_all("tr")
+        tmp = self._naviToGroupChanges(group)
+        
+        if tmp == None:
+            return [] 
+        
+        tmp = tmp.find_all("tr") 
+        
         response = []
         
         for elem in tmp:
@@ -138,4 +144,4 @@ class mptPage:
 if __name__ == "__main__":
     mpt = mptPage()
 
-    print(mpt.getChangesByDay("ВД50-3-19"))
+    print(mpt.getChangesByDay("П50-2-19"))
