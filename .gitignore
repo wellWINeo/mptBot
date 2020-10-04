@@ -1,4 +1,6 @@
-#for ignoring swp files (e.g. vim)
+#for ignoring vim files
 *.swp
-
 *.vim
+
+# 
+__pycache__
