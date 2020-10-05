@@ -1,6 +1,8 @@
 from threading import Thread, Lock
 import threading
-import mptShedule
+from mptParser import mptShedule
+import time
+
 
 class updaterThread(Thread):
     
@@ -9,12 +11,20 @@ class updaterThread(Thread):
         self.instance = mptPageInstance
 
     def run(self):
+        print("Thread started")
         lock = Lock()
-        lock.acquire()
-        #self.mptPageInstance.update()
-        lock.release()
+        while True:
+            time.sleep(10)
+            print("Thread set mutex")
+            lock.acquire()
+            if lock.locked(): 
+                print(threading.current_thread)
+            self.instance.update()
+            lock.release()
+            print("Thread unset mutex")
+                    
 
 if __name__ == "__main__":
-    thread = updaterThread()
+    mpt = mptShedule.mptPage()
+    thread = updaterThread(mpt)
     thread.start()
-

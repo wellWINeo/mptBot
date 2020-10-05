@@ -1,9 +1,10 @@
 import bs4
 import requests
+from mptParser import updater
+
+#TODO fix it
+#import log
 from logs import log
-
-
-
 
 class mptPage:
     """
@@ -38,7 +39,12 @@ class mptPage:
         Params:
         None
         """ 
+        self.updateDaemon = updater.updaterThread(self)
+        self.updateDaemon.setDaemon(True)
+        
         self.update()
+        
+        self.updateDaemon.start()
 
 
 
@@ -101,9 +107,12 @@ class mptPage:
 
     
     def getChangesByDay(self, group):
-        
-        tmp = self.__naviToGroupChanges(group)
-        
+
+        try:
+            tmp = self.__naviToGroupChanges(group)
+        except:
+            log.write("[Error] in __naviToGroupChanges")
+
         if tmp == None:
             return [] 
         
@@ -133,8 +142,15 @@ class mptPage:
         
         tmp = []
         dayNum = 0
-        bodies = self.__naviToGroup(group).find_all("tr")
-        
+        bodies = []
+
+        try:
+            bodies = self.__naviToGroup(group).find_all("tr")
+        except:
+
+            log.write("[Error] in __naviToGroup")
+
+
         for i in range(0, len(bodies) - 1):
         
             if dayNum == targetDay:
@@ -147,13 +163,13 @@ class mptPage:
                         tmp[len(tmp) - 1].append(elem.text)
                     i+= 1
         
-                    if i >= len(bodies) or self._checkTHead(bodies[i]):
+                    if i >= len(bodies) or self.__checkTHead(bodies[i]):
                         tmp.pop(0)
                         return tmp
         
             else:
         
-                if self._checkTHead(bodies[i]):
+                if self.__checkTHead(bodies[i]):
                     dayNum+= 1
 
 
@@ -163,7 +179,7 @@ class mptPage:
         Params:
         group -- string with correct name of group, like it typed on the site
         day   -- number of the day week, starts by 1"""
-        response = self._naviToGroup(group)
+        response = self.__naviToGroup(group)
         return response.find_all("thead")[day].h4.text 
 
 
