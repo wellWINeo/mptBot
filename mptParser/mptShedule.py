@@ -1,6 +1,8 @@
 import bs4
 import requests
 from mptParser import updater
+from threading import Thread, Lock
+
 
 #TODO fix it
 #import log
@@ -29,7 +31,7 @@ class mptPage:
     """
     pageShedule = ""
     pageChanges = ""
-
+    lock = Lock() 
     
     def __init__(self):
         """
@@ -39,7 +41,7 @@ class mptPage:
         Params:
         None
         """ 
-        self.updateDaemon = updater.updaterThread(self)
+        self.updateDaemon = updater.updaterThread(self, self.lock)
         self.updateDaemon.setDaemon(True)
         
         self.update()
@@ -64,16 +66,24 @@ class mptPage:
     def getWeekCount(self):
         """Returns count of current week (числитель/знаменатель) """
         try:
+            self.lock.acquire()
             response = self.pageShedule.body.main.find("span", class_ = "label label-info")
+            self.lock.release()
+
             return response
+
         except AttributeError as err:
             log.write("[Error] Atribute error in getWeekCount()")
             return err
 
     def __naviToGroup(self, group):
         """Privete method for navigation in soup to group (for shedule)"""
-
+        
+        self.lock.acquire()
+        print("__naviToGroup locked")
         divs = self.pageShedule.body.main.find_all("div", {"class" : "tab-pane"})
+        print("__naviToGroup unlocked")
+        self.lock.release()
 
         group = "Группа " + group
         for div in divs:
@@ -87,8 +97,9 @@ class mptPage:
 
     def __naviToGroupChanges(self, group):
         """Private method for navigation in soup to group (for changes)"""
-        
+        self.lock.acquire()
         divs = self.pageChanges.find_all("div", {"class" : "table-responsive"})
+        self.lock.release()
 
         for div in divs:
             if div.caption.b.text == group:
@@ -100,7 +111,9 @@ class mptPage:
     def __checkTHead(self, point):
         """Private method for checking THead, return bool value"""
         try:
+            self.lock.acquire()
             if point.thead.th.h4.text != None:
+                self.lock.release()
                 return True
         except:
             return False
@@ -129,6 +142,8 @@ class mptPage:
             ])
         return response[1:]
 
+
+
     def getSheduleByDay(self, group, targetDay): 
         """
         Method to get the shedule for day by group 
@@ -148,7 +163,7 @@ class mptPage:
             bodies = self.__naviToGroup(group).find_all("tr")
         except:
 
-            log.write("[Error] in __naviToGroup")
+            log.write("[Error] in calling __naviToGroup")
 
 
         for i in range(0, len(bodies) - 1):
