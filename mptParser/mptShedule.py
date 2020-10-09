@@ -1,11 +1,11 @@
+
+# base libs
 import bs4
 import requests
+from threading import Thread, RLock
+
+# own libs
 from mptParser import updater
-from threading import Thread, Lock
-
-
-#TODO fix it
-#import log
 from logs import log
 
 class mptPage:
@@ -31,7 +31,7 @@ class mptPage:
     """
     pageShedule = ""
     pageChanges = ""
-    lock = Lock() 
+    lock = RLock() 
     
     def __init__(self):
         """
@@ -48,6 +48,8 @@ class mptPage:
         
         self.updateDaemon.start()
 
+        self.sys_log = log.log("logs/sys_logs.txt")
+
 
 
     def update(self):
@@ -58,7 +60,7 @@ class mptPage:
             self.pageShedule = bs4.BeautifulSoup(self.pageShedule.text, "html.parser")   
             self.pageChanges = bs4.BeautifulSoup(self.pageChanges.text, "html.parser")
         except:
-           log.write("[Error] Coonection refused") 
+           self.sys_ylog.write("[Error] Coonection refused") 
            exit
 
 
@@ -73,7 +75,7 @@ class mptPage:
             return response
 
         except AttributeError as err:
-            log.write("[Error] Atribute error in getWeekCount()")
+            self.sys_log.write("[Error] Atribute error in getWeekCount()")
             return err
 
     def __naviToGroup(self, group):
@@ -89,7 +91,7 @@ class mptPage:
                 if div.find("h3").text == group:
                     return div
             except:
-                log.write("[error] AttributeError in _naviToGroup(), comparison")
+                self.sys_log.write("[error] AttributeError in _naviToGroup(), comparison")
         return None
 
 
@@ -111,12 +113,13 @@ class mptPage:
         try:
             self.lock.acquire()
             if point.thead.th.h4.text != None:
-                self.lock.release()
                 return True
-            self.lock.release()
+        
         except:
-            self.lock.release()
             return False
+        
+        finally:
+            self.lock.release()
 
     
     def getChangesByDay(self, group):
@@ -124,7 +127,7 @@ class mptPage:
         try:
             tmp = self.__naviToGroupChanges(group)
         except:
-            log.write("[Error] in __naviToGroupChanges")
+            self.sys_log.write("[Error] in __naviToGroupChanges")
 
         if tmp == None:
             return [] 
@@ -163,7 +166,7 @@ class mptPage:
             bodies = self.__naviToGroup(group).find_all("tr")
         except:
 
-            log.write("[Error] in calling __naviToGroup")
+            self.sys_log.write("[Error] in calling __naviToGroup")
 
 
         for i in range(0, len(bodies) - 1):

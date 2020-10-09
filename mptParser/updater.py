@@ -9,13 +9,11 @@ class updaterThread(Thread):
     def __init__(self, mptPageInstance, mutex):
         Thread.__init__(self)
         self.instance = mptPageInstance
-        print(mutex.locked())
         self.mutex = mutex
     
 
     def run(self):
         print("Thread started")
-        #lock = threading.Lock()
         while True:
             time.sleep(10)
             print("Thread set mutex")
