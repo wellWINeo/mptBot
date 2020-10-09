@@ -19,9 +19,7 @@ class updaterThread(Thread):
         while True:
             time.sleep(10)
             print("Thread set mutex")
-            
             self.mutex.acquire()
-            print("mutexed")
             self.instance.update()
             self.mutex.release()
             print("Thread unset mutex")

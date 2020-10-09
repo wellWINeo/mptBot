@@ -80,9 +80,7 @@ class mptPage:
         """Privete method for navigation in soup to group (for shedule)"""
         
         self.lock.acquire()
-        print("__naviToGroup locked")
         divs = self.pageShedule.body.main.find_all("div", {"class" : "tab-pane"})
-        print("__naviToGroup unlocked")
         self.lock.release()
 
         group = "Группа " + group
@@ -115,7 +113,9 @@ class mptPage:
             if point.thead.th.h4.text != None:
                 self.lock.release()
                 return True
+            self.lock.release()
         except:
+            self.lock.release()
             return False
 
     
