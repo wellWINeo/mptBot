@@ -60,7 +60,7 @@ class mptPage:
             self.pageShedule = bs4.BeautifulSoup(self.pageShedule.text, "html.parser")   
             self.pageChanges = bs4.BeautifulSoup(self.pageChanges.text, "html.parser")
         except:
-           self.sys_ylog.write("[Error] Coonection refused") 
+           self.sys_log.write("[Error] Coonection refused") 
            exit
 
 
@@ -135,7 +135,7 @@ class mptPage:
         tmp = tmp.find_all("tr") 
         
         response = []
-        
+         
         for elem in tmp:
             response.append([
                 elem.find(class_ = "lesson-number").text,
@@ -154,7 +154,8 @@ class mptPage:
         Params: group     
             -- string with correct name of group, like it typed on the site targetDay 
             -- number of the day week, starts by 1 
-        ---------------------- Returns:
+        ---------------------- 
+        Returns:
             matrix like this -> [[num1, name1, teacher1], [num2, name2, teacher2] ...]
         """
         
@@ -200,6 +201,9 @@ class mptPage:
         response = self.__naviToGroup(group)
         return response.find_all("thead")[day].h4.text 
 
+    def __del__(self):
+        self.updateDaemon.join()
+        del self.sys_log
 
 if __name__ == "__main__":
     mpt = mptPage()

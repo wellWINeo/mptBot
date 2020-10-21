@@ -1,5 +1,4 @@
-from threading import Thread, Lock
-import threading
+from threading import Thread, RLock
 from mptParser import mptShedule
 import time
 

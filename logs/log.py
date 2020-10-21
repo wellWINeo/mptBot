@@ -37,6 +37,9 @@ class log():
             self.log_handle = open(self.file_name, "a")
         self.log_handle.write(text + "\n")
 
+    def __del__(self):
+        self.log_handle.close()
+
 
 if __name__ == "__main__":
     log = log("sys_logs.txt")
