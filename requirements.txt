@@ -1,4 +1,5 @@
 # parser deps
 beautifulsoup4
 requests
+pyTelegramBotAPI
 

@@ -1,9 +1,15 @@
-#for ignoring vim files
+# for ignoring vim files
 *.swp
 *.vim
 
 # 
 __pycache__
 
-#logs ingore
+# logs ingore
 sys_logs.txt
+
+# ignore symlink for tests in bot folder
+bot/config.py
+
+# ignore changes in config
+config.py
