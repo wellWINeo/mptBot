@@ -1,5 +1,7 @@
 # parser deps
 beautifulsoup4
 requests
+
+# bot deps
 pyTelegramBotAPI
 

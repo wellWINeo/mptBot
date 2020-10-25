@@ -66,4 +66,5 @@ def shedule_handler(message):
 def show_users(message):
     print(users)
 
-bot.polling()
+if __name__ == "__main__":
+    bot.polling()
