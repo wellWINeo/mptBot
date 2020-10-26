@@ -13,3 +13,5 @@ bot/config.py
 
 # ignore changes in config
 config.py
+
+test*

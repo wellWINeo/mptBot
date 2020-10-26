@@ -4,8 +4,4 @@ import time
 
 if __name__ == "__main__":
     mpt = mptShedule.mptPage()
-    for i in range(0, 10):
-        time.sleep(1)
-        print(mpt.getSheduleByDay("П50-2-19", 2))
-
-    del mpt
+    print(mpt.get_groups_by_dir("09.02.01"))
