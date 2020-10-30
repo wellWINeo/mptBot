@@ -10,6 +10,8 @@ sys_logs.txt
 
 # ignore symlink for tests in bot folder
 bot/config.py
+bot/logs
+bot/mptParser
 
 # ignore changes in config
 config.py

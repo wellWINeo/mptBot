@@ -95,11 +95,14 @@ class mptPage:
         return string
 
     def get_groups_by_dir(self, direction):
+        
+        self.lock.acquire()
         tabs = self.pageShedule.find_all("ul", {"class" : "nav nav-tabs"})
+        self.lock.release()
         num = self.__tab_num(direction, tabs[0].find_all("li"))
         tabs = tabs[1::]
         
-        groups = list(tabs[num])[1::2]
+        groups = (list(tabs[num]))[1::2]
         response = []
 
         for group in groups:

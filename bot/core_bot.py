@@ -2,31 +2,29 @@ import telebot
 import time
 import config
 import bot_markup
+import math
+from mptParser.mptShedule import mptPage
 
-users = []
+users = {}
 bot = telebot.TeleBot(config.bot_token)
 
+mpt = mptPage()
 
 class user():
     user_id = None
     name = ""
-    group = ""
-    is_complete = None
+    group = None
 
-    def __init__(self, _id, _name, _group = None, not_complete = False):
+    def __init__(self, _id, _name):
         self.user_id = _id
         self.name = _name
-        if not_complete == False:
-            self.group = _group
-            is_complete = True
-        else:
-            is_complete = False
-        
+
 
 def bot_start():
     global users, bot
     users = []
     bot = telebot.TeleBot(config.bot_token)
+
 
 def is_user_known(user_id):
     for user in users:
@@ -35,7 +33,7 @@ def is_user_known(user_id):
     return False
 
 
-@bot.message_handler(commands='start')
+@bot.message_handler(commands=['start'])
 def start_msg(message):
     bot.reply_to(message, "Привет, бот запущен!\nЕго цель - удобноый просмотр рас    писания МПТ, \
 а также он предупреждает о заменах.\n \
@@ -44,14 +42,20 @@ def start_msg(message):
     if not is_user_known(message.from_user.id):
         bot.send_message(message.chat.id, "Выберите направление: ",
             reply_markup=bot_markup.direction_choose_keyboard())
-        new_user = user(message.chat.id, message.from_user.first_name, 
-            not_complete=True)
-        users.append(new_user)
 
-def wait_for_dir_answer(messages, instance):
+        new_user = user(message.chat.id, message.from_user.first_name)
+        users.update({new_user.user_id : new_user})
+        bot.set_update_listener(wait_for_dir_answer)
+        
+def wait_for_dir_answer(messages):
     for message in messages:
-        if message.chat.id == instance.user_id:
-            bot.send_message(message.chat.id, "Выберите группу: ")
+        if message.chat.id in users:
+            if (users[message.chat.id]).group == None:
+                bot.send_message(message.chat.id, "Выберите группу: ",
+                        reply_markup=bot_markup.group_choose_keyboard(mpt, message.text))
+                users[message.chat.id].group = "-"
+            elif (users[message.chat.id]).group == "-":
+                bot.send_message(message.chat.id, "Placeholder")
 
 if __name__ == "__main__":
     bot.polling()
