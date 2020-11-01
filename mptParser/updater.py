@@ -12,14 +12,14 @@ class updaterThread(Thread):
     
 
     def run(self):
-        print("Thread started")
+        #print("Thread started")
         while True:
             time.sleep(10)
-            print("Thread set mutex")
+            #print("Thread set mutex")
             self.mutex.acquire()
             self.instance.update()
             self.mutex.release()
-            print("Thread unset mutex")
+            #print("Thread unset mutex")
          
 
 

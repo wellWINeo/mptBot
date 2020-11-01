@@ -21,6 +21,17 @@ def group_choose_keyboard(mpt, direction):
     
     return markup
 
+def choose_shedule_date():
+    markup = types.InlineKeyboardMarkup(row_width=3)
+
+    markup.add(
+            types.InlineKeyboardButton("На сегодня", callback_data="cb_today"),
+            types.InlineKeyboardButton("На завтра", callback_data="cb_tomorrow"),
+            types.InlineKeyboardButton("На неделю", callback_data="cb_week")
+            )
+    
+    return markup
+
 
 def direction_choose_keyboard():
     markup = types.ReplyKeyboardMarkup(row_width=3)
