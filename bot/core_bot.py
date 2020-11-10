@@ -58,9 +58,8 @@ def wait_for_dir_answer(messages):
                 user.group = "-"
 
             elif user.group == "-": 
-                tg_bot.send_message(message.chat.id, "Отличо! Группа выбрана и сохранена")
+                tg_bot.send_message(message.chat.id, "Отличо! Группа выбрана и сохранена", reply_markup=telebot.types.ReplyKeyboardRemove())
                 user.group = message.text 
-
 
 @tg_bot.message_handler(func=lambda message:
                         True if message.text in commands_tree["HELP"]
@@ -97,6 +96,14 @@ def callback_query(call):
 
     else:
         tg_bot.answer_callback_query(call.id, "Internal callback function error")
+
+@tg_bot.message_handler(func=lambda message:
+                        True if message.text in commands_tree["CHANGES"]
+                        else False)
+def changes_handler(message):
+    cur_user = recognize_user(message.from_user.id)
+    if cur_user:
+        tg_bot.send_message(message.chat.id, "Changes placeholder for user in group: " + str(cur_user.group))
 
 
 if __name__ == "__main__":

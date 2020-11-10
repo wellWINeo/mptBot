@@ -68,6 +68,3 @@ def direction_choose_keyboard():
     markup.row(button1st)
 
     return markup
-
-
-
