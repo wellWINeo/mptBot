@@ -12,6 +12,7 @@ sys_logs.txt
 bot/config.py
 bot/logs
 bot/mptParser
+bot/bot
 
 # ignore changes in config
 config.py

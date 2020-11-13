@@ -1,11 +1,15 @@
 import telebot
 import time
 import config
-import bot_markup
 from mptParser.mptShedule import mptPage
 
-users = []
+#hack to fix circular deps
 tg_bot = telebot.TeleBot(config.bot_token)
+
+import bot.utils.bot_markup as bot_markup
+import bot.utils.sheduler as sheduler
+import bot.utils.handlers as handlers
+
 mpt = mptPage()
 
 commands_tree = {
@@ -13,22 +17,6 @@ commands_tree = {
         "SHEDULE": ["shedule", "/shedule", "расписание", "/расписание"],
         "CHANGES": ["changes", "/changes", "замены", "/замены"],
         "HELP": ["help", "/help", "помощь", "/помощь"]}
-
-
-class user():
-    user_id = None
-    name = ""
-    group = None
-
-    def __init__(self, _id, _name):
-        self.user_id = _id
-        self.name = _name
-
-def recognize_user(id_):
-    for user in users:
-        if user.user_id == id_:
-            return user
-    return False
 
 
 @tg_bot.message_handler(func=lambda message: 
@@ -39,27 +27,26 @@ def start_handler(message):
 а также он предупреждает о заменах.\n \
 Для того чтобы узнать о комманда введите:\n \
 /help")
-    if recognize_user(message.from_user.id) == False:
+    if handlers.recognize_user(message.from_user.id) == False:
         tg_bot.send_message(message.chat.id, "Выберите направление: ",
             reply_markup=bot_markup.direction_choose_keyboard())
 
-        new_user = user(message.from_user.id, message.from_user.first_name)
-        users.append(new_user) 
-        tg_bot.set_update_listener(wait_for_dir_answer)
+        new_user = handlers.user(message.from_user.id, message.from_user.first_name)
+        handlers.users.append(new_user)
 
-def wait_for_dir_answer(messages):
+@tg_bot.message_handler(func= lambda message: handlers.is_msg_answer(message))
+def answer_message_handler(message):
+    user = handlers.recognize_user(message.from_user.id)
     
-    for message in messages:
-        gen = (user for user in users if user.user_id == message.from_user.id)
-        for user in gen:       
-            if user.group == None: 
-                tg_bot.send_message(message.chat.id, "Выберите группу: ",
-                                    reply_markup=bot_markup.group_choose_keyboard(mpt, message.text))
-                user.group = "-"
+    if user:
+        if user.group == None:
+            sheduler.pipeline.put(sheduler.context(sheduler.actions.WAIT_GROUP_CHOOSE, message))
+            sheduler.shedule_event.set()
+            user.group = "-"
 
-            elif user.group == "-": 
-                tg_bot.send_message(message.chat.id, "Отличо! Группа выбрана и сохранена", reply_markup=telebot.types.ReplyKeyboardRemove())
-                user.group = message.text 
+        elif user.group == "-":
+            sheduler.pipeline.put(sheduler.context(sheduler.actions.WAIT_GROUP_ALREADY_CHOOSED, message))
+            user.group = message.text
 
 @tg_bot.message_handler(func=lambda message:
                         True if message.text in commands_tree["HELP"]
@@ -73,14 +60,14 @@ def help_handler(message):
                         else False)
 def shedule_handler(message):
     tg_bot.send_message(message.chat.id, "Выберите на какой срок: ", 
-            reply_markup=bot_markup.choose_shedule_date())
+                        reply_markup=bot_markup.choose_shedule_date())
 
 
 @tg_bot.callback_query_handler(func=lambda call: 
                                True if call.data[:3] == "cb_" 
                                else False)
 def callback_query(call):
-    cur_user = recognize_user(call.from_user.id)
+    cur_user = handlers.recognize_user(call.from_user.id)
     
     if call.data == "cb_today":
         tg_bot.answer_callback_query(call.id, "Расписание на сегодня")
@@ -101,7 +88,7 @@ def callback_query(call):
                         True if message.text in commands_tree["CHANGES"]
                         else False)
 def changes_handler(message):
-    cur_user = recognize_user(message.from_user.id)
+    cur_user = handlers.recognize_user(message.from_user.id)
     if cur_user:
         tg_bot.send_message(message.chat.id, "Changes placeholder for user in group: " + str(cur_user.group))
 
