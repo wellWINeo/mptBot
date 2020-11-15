@@ -14,7 +14,7 @@ deploy:
 	
 	DIRNAME=$(basename $DIR)
 	
-	alias ssh='ssh -c ~/.ssh/'
+	alias ssh='ssh -i ~/.ssh/'
 
 	cd $DIRPATH; tar czf - $DIRNAME | ssh root@$HOST '(cd $TARGETPATH; rm -rf *; tar xzf -)' 
 

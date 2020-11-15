@@ -2,9 +2,9 @@ import threading
 from mptParser.mptShedule import mptPage
 import queue
 from enum import Enum
-import bot.core_bot as core_bot
-import bot.utils.handlers as handlers
-import bot.utils.bot_markup as bot_markup
+import bot.core as core_bot
+import bot.handlers as handlers
+import bot.markup as bot_markup
 import telebot
 
 shedule_mutex = threading.RLock()
