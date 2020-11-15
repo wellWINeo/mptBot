@@ -9,6 +9,6 @@ import time
 import concurrent.futures
 
 if __name__ == "__main__":
-    ThreadPool = bot.sheduler.ThreadPool(bot.sheduler.msg_handler, 2)
+    ThreadPool = bot.sheduler.ThreadPool(bot.handlers.driverThread, 2)
     ThreadPool.start()
     core_bot.tg_bot.polling()
