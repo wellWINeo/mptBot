@@ -3,21 +3,23 @@ import bot.sheduler as sheduler
 import bot.core as bot
 import bot.markup as markup
 import bot.handlers as handlers
+import bot.db as db
 import telebot
 from mptParser.mptShedule import mptPage
-
-users = []
-mpt = mptPage()
-bot = bot.tg_bot
 
 class user():
     user_id = None
     name = ""
     group = None
 
-    def __init__(self, _id, _name):
+    def __init__(self, _id, _name, _group=None):
         self.user_id = _id
         self.name = _name
+        self.group = _group
+
+users = db.load()
+mpt = mptPage()
+bot = bot.tg_bot
 
 def recognize_user(id_):
     for user in users:

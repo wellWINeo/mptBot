@@ -9,6 +9,7 @@ tg_bot = telebot.TeleBot(config.bot_token)
 import bot.markup as bot_markup
 import bot.sheduler as sheduler
 import bot.handlers as handlers
+import bot.db as db
 
 mpt = mptPage()
 
@@ -33,6 +34,7 @@ def start_handler(message):
 
         new_user = handlers.user(message.from_user.id, message.from_user.first_name)
         handlers.users.append(new_user)
+        db.add_user(new_user)
 
 @tg_bot.message_handler(func= lambda message: handlers.is_msg_answer(message))
 def answer_message_handler(message):
@@ -43,10 +45,13 @@ def answer_message_handler(message):
             sheduler.pipeline.put(sheduler.context(sheduler.actions.WAIT_GROUP_CHOOSE, message))
             sheduler.shedule_event.set()
             user.group = "-"
+            db.users_db.update({"group" : "-"}, db.User.user_id == user.user_id)
 
         elif user.group == "-":
             sheduler.pipeline.put(sheduler.context(sheduler.actions.WAIT_GROUP_ALREADY_CHOOSED, message))
             user.group = message.text
+            db.users_db.update({"group" : message.text},
+                                db.User.user_id == user.user_id)
 
 @tg_bot.message_handler(func=lambda message:
                         True if message.text in commands_tree["HELP"]
