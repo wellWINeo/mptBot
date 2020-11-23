@@ -25,13 +25,15 @@ class context:
     action = None
     message = None
     call = None
-
+    group = None
+    
     def __init__(self, action, message = None, call = None):
         if (message == None) and (call != None):
             self.call = call
             self.message = call.message
         else:
             self.message = message
+        self.group = handlers.recognize_user(self.message.from_user.id).group
         self.action = action
 
 
