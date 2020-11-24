@@ -17,4 +17,5 @@ restore_logs: clean_logs
 	touch logs/sys_logs.txt err out 
 
 deploy:
+	echo "MAKE_HOST:${HOST}"
 	sh -c scripts/deploy.sh ${HOST} ${KEY} ${USER_LOGIN} ${TARGETPATH}
