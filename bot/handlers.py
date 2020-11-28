@@ -70,6 +70,26 @@ class driverThread(Thread):
                     text += "[" + i[0] + "] " + i[1] + ", " + i[2] + "\n\n"
                 bot.send_message(self.context.message.chat.id, text=text)
 
+    def handle_changes(self):
+        text = ""
+        changes_tree = mpt.getChangesByDay(self.context.group)
+        
+        if len(changes_tree) != 0:
+            text += "Группа: " + self.context.group + "\n"
+            
+            for lesson in changes_tree:
+                text += "[" + lesson[0] + "] \n"
+                text += "  Заменяется: " + lesson[1] + "\n"
+                text += "  На что : " + lesson[2] + "\n"
+                text += "  Добавлено: " + lesson[3] + "\n"
+                text += "---" + "\n"
+        else:
+            text = "На сегодня замен для группы " + self.context.group + " нет!"
+        
+        print(len(text))
+        bot.send_message(self.context.message.chat.id, text=text)
+
+
 
     def run(self):
         while True:
@@ -126,8 +146,10 @@ class driverThread(Thread):
                     cur_user = handlers.recognize_user(self.context.message.from_user.id)
 
                     if cur_user:
-                        bot.send_message(self.context.message.chat.id,
-                                        "Changes placeholder - " + str(cur_user.group))
+                        print("command received")
+                        self.handle_changes()
+                        # bot.send_message(self.context.message.chat.id,
+                        #                 "Changes placeholder - " + str(cur_user.group))
                 if (sheduler.pipeline.qsize()) == 0:
                     sheduler.shedule_event.clear()
             else:
