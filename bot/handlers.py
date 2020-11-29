@@ -48,6 +48,7 @@ class driverThread(Thread):
     
     def handle_shedule(self, date):
         text = ""
+        
         if date != "week":
             
             if date == "today":
@@ -58,9 +59,15 @@ class driverThread(Thread):
             shedule_tree = mpt.getSheduleByDay(self.context.group, day_num.isoweekday())
             text += str(day_num.date()) + "\n"
             text += "------------" + "\n"
-            for i in shedule_tree:
-                text += "[" + i[0] + "] " + i[1] + ", " + i[2] + "\n"
+            
+            if shedule_tree != None:
+                for i in shedule_tree:
+                    text += "[" + i[0] + "] " + i[1] + ", " + i[2] + "\n"
+            else:
+                text += "На сегодня предметов не найдено!"
+
             bot.send_message(self.context.message.chat.id, text=text)
+        
         else:
             for d in range(1, 6):
                 shedule_tree = mpt.getSheduleByDay(self.context.group, d)

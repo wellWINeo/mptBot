@@ -2,6 +2,7 @@
 # base libs
 import bs4
 import requests
+import re
 from threading import Thread, RLock
 
 # own libs
@@ -225,7 +226,9 @@ class mptPage:
                     tmp.append([])
         
                     for elem in lesson:
-                        tmp[len(tmp) - 1].append(elem.text)
+                        append_elem = re.sub(" +", "", elem.text)
+                        print("|" + append_elem + "|")
+                        tmp[len(tmp) - 1].append(append_elem)
                     i+= 1
         
                     if i >= len(bodies) or self.__checkTHead(bodies[i]):

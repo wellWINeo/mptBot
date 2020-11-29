@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: UTF8-*-
+# -*- coding: UTF8 -*-
 
 from mptParser import mptShedule
 from logs import log
