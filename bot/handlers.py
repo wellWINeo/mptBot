@@ -6,6 +6,7 @@ import bot.handlers as handlers
 import bot.db as db
 import telebot
 import datetime
+import logging
 from mptParser.mptShedule import mptPage
 
 class user():
@@ -37,7 +38,6 @@ def is_msg_answer(message):
 # Functions
 # for handling
 # commands
-
 
 class driverThread(Thread):
 
@@ -101,6 +101,7 @@ class driverThread(Thread):
     def run(self):
         while True:
             if sheduler.shedule_event.is_set():
+                logging.debug("[" + str(self.ident) + "] " + "Thread received task")
                 self.context = sheduler.pipeline.get()
 
                 # If bot wait group in answr
@@ -160,8 +161,8 @@ class driverThread(Thread):
                 if (sheduler.pipeline.qsize()) == 0:
                     sheduler.shedule_event.clear()
             else:
-                print("Thread locked")
+                logging.debug("[" + str(self.ident) + "] " + "Thread locked")
                 sheduler.shedule_event.wait()
-
+                logging.debug("[" + str(self.ident) + "] " + "Thread unlocked")
 
 

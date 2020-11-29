@@ -1,7 +1,7 @@
 from threading import Thread, RLock
 from mptParser import mptShedule
 import time
-
+import config
 
 class updaterThread(Thread):
     
@@ -14,7 +14,7 @@ class updaterThread(Thread):
     def run(self):
         #print("Thread started")
         while True:
-            time.sleep(10)
+            time.sleep(config.parser_update_time)
             #print("Thread set mutex")
             self.mutex.acquire()
             self.instance.update()
