@@ -226,8 +226,7 @@ class mptPage:
                     tmp.append([])
         
                     for elem in lesson:
-                        append_elem = re.sub(" +", "", elem.text)
-                        print("|" + append_elem + "|")
+                        append_elem = re.sub(" +", " ", elem.text)
                         tmp[len(tmp) - 1].append(append_elem)
                     i+= 1
         

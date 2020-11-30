@@ -100,7 +100,8 @@ class driverThread(Thread):
 
     def run(self):
         while True:
-            if sheduler.shedule_event.is_set():
+            #if sheduler.shedule_event.is_set():
+            if sheduler.pipeline.qsize() != 0:    
                 logging.debug("[" + str(self.ident) + "] " + "Thread received task")
                 self.context = sheduler.pipeline.get()
 
