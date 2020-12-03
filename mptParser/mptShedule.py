@@ -4,6 +4,7 @@ import bs4
 import requests
 import re
 from threading import Thread, RLock
+import logging
 
 # own libs
 from mptParser import updater
@@ -30,8 +31,8 @@ class mptPage:
     getHeader(group, day)
         Return name of week's day
     """
-    pageShedule = ""
-    pageChanges = ""
+    pageShedule: str
+    pageChanges: str
     lock = RLock() 
     
     def __init__(self):
@@ -59,29 +60,31 @@ class mptPage:
             self.pageChanges = requests.get("https://mpt.ru/studentu/izmeneniya-v-raspisanii")
 
             self.pageShedule = bs4.BeautifulSoup(self.pageShedule.text, "html.parser")   
-            self.pageChanges = bs4.BeautifulSoup(self.pageChanges.text, "html.parser")
+            self.pageChanges = bs4.BeautifulSoup(self.pageChanges.text, "html.parser").body.main
+
         except:
-           self.sys_log.write("[Error] Coonection refused") 
-           exit
+            logging.error("Connection refused")
+            exit
 
 
 
-    def getWeekCount(self):
+    def getWeekCount(self) -> str:
         """Returns count of current week (числитель/знаменатель) """
         try:
             self.lock.acquire()
-            response = self.pageShedule.body.main.find("span", class_ = "label label-info")
+            response = self.pageShedule.find("span", class_ = "label label-info")
             self.lock.release()
 
             return response
 
-        except AttributeError as err:
-            self.sys_log.write("[Error] Atribute error in getWeekCount()")
-            return err
+        except AttributeError:
+            logging.error("Attribute erro in getWeekCount()")
+            return "Can't get week count"
+
     #
     # UNSAFE 
     #
-    def __tab_num(self, target, headers):
+    def __tab_num(self, target: str, headers: list):
         for num in range(0, len(headers)):
             if headers[num].a.text == target:
                 return num
@@ -89,13 +92,13 @@ class mptPage:
     
     # TODO 
     # make spaces deleting via regex
-    def __rm_spaces(self, string):
+    def __rm_spaces(self, string: str):
         while "  " in string:
             string = string.replace("  ", " ")[1::]
         string = string[:-1]
         return string
 
-    def get_groups_by_dir(self, direction):
+    def get_groups_by_dir(self, direction: str):
         
         self.lock.acquire()
         tabs = self.pageShedule.find_all("ul", {"class" : "nav nav-tabs"})
@@ -125,7 +128,7 @@ class mptPage:
     # /UNSAFE
     #
 
-    def __naviToGroup(self, group):
+    def __naviToGroup(self, group: str):
         """Privete method for navigation in soup to group (for shedule)"""
         
         self.lock.acquire()
@@ -142,7 +145,7 @@ class mptPage:
         return None
 
 
-    def __naviToGroupChanges(self, group):
+    def __naviToGroupChanges(self, group: str):
         """Private method for navigation in soup to group (for changes)"""
         self.lock.acquire()
         divs = self.pageChanges.find_all("div", {"class" : "table-responsive"})
@@ -155,8 +158,10 @@ class mptPage:
                 pass
         return None
 
-    def __checkTHead(self, point):
-        """Private method for checking THead, return bool value"""
+    def __checkTHead(self, point) -> bool:
+        """
+        Private method for checking THead, return bool value
+        """
         try:
             self.lock.acquire()
             if point.thead.th.h4.text != None:
@@ -169,12 +174,25 @@ class mptPage:
             self.lock.release()
 
     
-    def getChangesByDay(self, group):
-
+    def getChangesByDay(self, group) -> list:
+        """
+        Method to get today changes
+        ---------------------------
+        Params:
+            -- $group = string wit correct name of group like it type on the site 
+        
+        ---------------------------
+        Returns:
+            matrix like this -> [
+                                 [lesson_num1, replace-from1, replace-to1, updated-at1],
+                                 [lesson_num2, replace-from2, replace-to2, updated-at2],
+                                 ...]
+        """
+        
         try:
             tmp = self.__naviToGroupChanges(group)
         except:
-            self.sys_log.write("[Error] in __naviToGroupChanges")
+            logging.error("Exception in __naviToGroup")
 
         if tmp == None:
             return [] 
@@ -194,21 +212,22 @@ class mptPage:
 
 
 
-    def getSheduleByDay(self, group, targetDay): 
+    def getSheduleByDay(self, group, targetDay) -> list: 
         """
         Method to get the shedule for day by group 
         ---------------------- 
-        Params: group     
-            -- string with correct name of group, like it typed on the site targetDay 
-            -- number of the day week, starts by 1 
+        Params:     
+            -- $day = string with correct name of group, like it typed on the site 
+            -- $targetDay = number of the day week, starts by 1 
         ---------------------- 
         Returns:
             matrix like this -> [[num1, name1, teacher1], [num2, name2, teacher2] ...]
         """
         
-        tmp = []
+        bodies = tmp = list()
+
         dayNum = 0
-        bodies = []
+        #bodies = []
 
         try:
             bodies = self.__naviToGroup(group).find_all("tr")
@@ -240,20 +259,21 @@ class mptPage:
                     dayNum+= 1
 
 
-    def getHeader(self, group, day):
-        """Returns string with day of the week name
+    def getHeader(self, group, day) -> str:
+        """
+        Returns string with day of the week name
         ----------------------
         Params:
         group -- string with correct name of group, like it typed on the site
-        day   -- number of the day week, starts by 1"""
-        response = self.__naviToGroup(group)
-        return response.find_all("thead")[day].h4.text 
+        day   -- number of the day week, starts by 1
+        """
+        return self.__naviToGroup(group).find_all("thead")[day-1].h4.text 
 
     def __del__(self):
         self.updateDaemon.join()
         del self.sys_log
 
-if __name__ == "__main__":
-    mpt = mptPage()
+# if __name__ == "__main__":
+#     mpt = mptPage()
 
-    print(mpt.getSheduleByDay("П50-2-19", 1))
+#     print(mpt.getSheduleByDay("П50-2-19", 1))

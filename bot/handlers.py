@@ -9,6 +9,7 @@ import datetime
 import logging
 from mptParser.mptShedule import mptPage
 
+
 class user():
     user_id = None
     name = ""
@@ -57,12 +58,12 @@ class driverThread(Thread):
                 day_num = datetime.datetime.today() + datetime.timedelta(days=1)
             
             shedule_tree = mpt.getSheduleByDay(self.context.group, day_num.isoweekday())
-            text += str(day_num.date()) + "\n"
+            text += f"{mpt.getHeader(self.context.group, day_num.isoweekday())}\n{day_num.date()} \n"
             text += "------------" + "\n"
             
             if shedule_tree != None:
                 for i in shedule_tree:
-                    text += "[" + i[0] + "] " + i[1] + ", " + i[2] + "\n"
+                    text += f"[{i[0]}] {i[1]}, {i[2]} \n"
             else:
                 text += "На сегодня предметов не найдено!"
 
@@ -71,10 +72,10 @@ class driverThread(Thread):
         else:
             for d in range(1, 6):
                 shedule_tree = mpt.getSheduleByDay(self.context.group, d)
-                text = "Day: " + str(d) + "\n"
-                text += "------------" + "\n"
+                text = f"Day: {d}\n"
+                text += "------------\n"
                 for i in shedule_tree:
-                    text += "[" + i[0] + "] " + i[1] + ", " + i[2] + "\n\n"
+                    text += f"[{i[0]}] {i[1]}, {i[2]}\n\n"
                 bot.send_message(self.context.message.chat.id, text=text)
 
     def handle_changes(self):
@@ -82,18 +83,17 @@ class driverThread(Thread):
         changes_tree = mpt.getChangesByDay(self.context.group)
         
         if len(changes_tree) != 0:
-            text += "Группа: " + self.context.group + "\n"
+            text += f"Группа: {self.context.group}\n"
             
             for lesson in changes_tree:
-                text += "[" + lesson[0] + "] \n"
-                text += "  Заменяется: " + lesson[1] + "\n"
-                text += "  На что : " + lesson[2] + "\n"
-                text += "  Добавлено: " + lesson[3] + "\n"
-                text += "---" + "\n"
+                text += f"[{lesson[0]}]\n"
+                text += "  Заменяется: {lesson[1]}\n"
+                text += "  На что : {lesson[2]}\n"
+                text += "  Добавлено: {lesson[3]}\n"
+                text += "---\n"
         else:
-            text = "На сегодня замен для группы " + self.context.group + " нет!"
+            text = f"На сегодня замен для группы {self.context.group} нет!"
         
-        print(len(text))
         bot.send_message(self.context.message.chat.id, text=text)
 
 
@@ -101,8 +101,8 @@ class driverThread(Thread):
     def run(self):
         while True:
             #if sheduler.shedule_event.is_set():
-            if sheduler.pipeline.qsize() != 0:    
-                logging.debug("[" + str(self.ident) + "] " + "Thread received task")
+            if sheduler.pipeline.qsize() != 0:
+                logging.debug("[{self.ident()}] Thread received task")
                 self.context = sheduler.pipeline.get()
 
                 # If bot wait group in answr
@@ -110,7 +110,8 @@ class driverThread(Thread):
                     bot.send_message(self.context.message.chat.id,
                                     "Выберите группу: ",
                                     reply_markup=markup.group_choose_keyboard(mpt, 
-                                                            self.context.message.text))
+                                                        self.context.message.text))
+
                 # If user already choose group
                 elif self.context.action == sheduler.actions.WAIT_GROUP_ALREADY_CHOOSED:
                     bot.send_message(self.context.message.chat.id,
@@ -130,20 +131,16 @@ class driverThread(Thread):
                     # Today
                     if self.context.call.data == "cb_today":
                         bot.answer_callback_query(self.context.call.id, "Расписание на сегодня")
-                        bot.send_message(self.context.message.chat.id,
-                                        "Today_placeholder {0}".format(cur_user.group))
                         self.handle_shedule("today")
+                    
                     # Tomorrow
                     if self.context.call.data == "cb_tomorrow":
                         bot.answer_callback_query(self.context.call.id, "Расписание на завтра")
-                        bot.send_message(self.context.message.chat.id,
-                                        "Tomorrow_placeholder {0}".format(cur_user.group))
                         self.handle_shedule("tomorrow")
+                    
                     # All weak
                     if self.context.call.data == "cb_week":
                         bot.answer_callback_query(self.context.call.id, "Расписание на неделю")
-                        bot.send_message(self.context.message.chat.id,
-                                        "Weak_placeholder {0}".format(cur_user.group))
                         self.handle_shedule("week")
                    
                     else:
@@ -157,13 +154,10 @@ class driverThread(Thread):
                     if cur_user:
                         print("command received")
                         self.handle_changes()
-                        # bot.send_message(self.context.message.chat.id,
-                        #                 "Changes placeholder - " + str(cur_user.group))
                 if (sheduler.pipeline.qsize()) == 0:
                     sheduler.shedule_event.clear()
             else:
-                logging.debug("[" + str(self.ident) + "] " + "Thread locked")
+                logging.debug("[{self.ident)}] Thread locked")
                 sheduler.shedule_event.wait()
-                logging.debug("[" + str(self.ident) + "] " + "Thread unlocked")
-
+                logging.debug("[{self.ident)}] Thread unlocked")
 

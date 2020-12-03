@@ -10,16 +10,25 @@ import concurrent.futures
 import logging
 import config
 
+#debug
+if config.debug:
+    from guppy import hpy
+
+
+# MAIN LOOP
 if __name__ == "__main__":
     if config.debug:
+        mem_heap = hpy()
         log_level = logging.DEBUG
     else:
         log_level = logging.INFO
 
-    logging.basicConfig(level=log_level, filename=config.logs_path, filemode="a")
+    logging.basicConfig(level=log_level, filename=config.logs_path, filemode="w")
     
     logging.info("Bot started!")
     ThreadPool = bot.sheduler.ThreadPool(bot.handlers.driverThread, config.exec_threads)
     ThreadPool.start()
-    core_bot.tg_bot.polling()
+    if config.debug:
+        print(mem_heap.heap())
+    core_bot.tg_bot.polling(none_stop=True)
     logging.info("Bot stopped!")
