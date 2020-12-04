@@ -48,6 +48,7 @@ class driverThread(Thread):
         Thread.__init__(self)
     
     def handle_shedule(self, date):
+        logging.debug("handling shedule func started")
         text = ""
         
         if date != "week":
@@ -77,6 +78,8 @@ class driverThread(Thread):
                 for i in shedule_tree:
                     text += f"[{i[0]}] {i[1]}, {i[2]}\n\n"
                 bot.send_message(self.context.message.chat.id, text=text)
+        
+        logging.debug("handle shedule func exiting")
 
     def handle_changes(self):
         text = ""
@@ -97,67 +100,59 @@ class driverThread(Thread):
         bot.send_message(self.context.message.chat.id, text=text)
 
 
-
     def run(self):
         while True:
-            #if sheduler.shedule_event.is_set():
-            if sheduler.pipeline.qsize() != 0:
-                logging.debug("[{self.ident()}] Thread received task")
-                self.context = sheduler.pipeline.get()
+            logging.debug(f"[{self.ident}] Thread received task")
+            self.context = sheduler.pipeline.get()
+            logging.debug(f"[{self.ident}] Thread got context")
+            
+            # If bot wait group in answr
+            if self.context.action == sheduler.actions.WAIT_GROUP_CHOOSE:
+                bot.send_message(self.context.message.chat.id,
+                                "Выберите группу: ",
+                                reply_markup=markup.group_choose_keyboard(mpt, 
+                                                    self.context.message.text))
 
-                # If bot wait group in answr
-                if self.context.action == sheduler.actions.WAIT_GROUP_CHOOSE:
-                    bot.send_message(self.context.message.chat.id,
-                                    "Выберите группу: ",
-                                    reply_markup=markup.group_choose_keyboard(mpt, 
-                                                        self.context.message.text))
-
-                # If user already choose group
-                elif self.context.action == sheduler.actions.WAIT_GROUP_ALREADY_CHOOSED:
-                    bot.send_message(self.context.message.chat.id,
-                                    "Отлично! Группа выбрана и сохранена",
-                                    reply_markup=telebot.types.ReplyKeyboardRemove())
+            # If user already choose group
+            elif self.context.action == sheduler.actions.WAIT_GROUP_ALREADY_CHOOSED:
+                bot.send_message(self.context.message.chat.id,
+                                "Отлично! Группа выбрана и сохранена",
+                                reply_markup=telebot.types.ReplyKeyboardRemove())
+            
+            # Send shedule to user    
+            elif self.context.action == sheduler.actions.SHEDULE_HANDLER:
+                bot.send_message(self.context.message.chat.id, 
+                                "Выберите на какой срок: ",
+                                reply_markup=markup.choose_shedule_date())
+            
+            # Answer on callback
+            elif self.context.action == sheduler.actions.CALLBACK_QUERY:
+                cur_user = handlers.recognize_user(self.context.call.from_user.id)
                 
-                # Send shedule to user    
-                elif self.context.action == sheduler.actions.SHEDULE_HANDLER:
-                    bot.send_message(self.context.message.chat.id, 
-                                    "Выберите на какой срок: ",
-                                    reply_markup=markup.choose_shedule_date())
+                # Today
+                if self.context.call.data == "cb_today":
+                    bot.answer_callback_query(self.context.call.id, "Расписание на сегодня")
+                    logging.debug(f"{self.ident} Thread handling shedule")
+                    self.handle_shedule("today")
                 
-                # Answer on callback
-                elif self.context.action == sheduler.actions.CALLBACK_QUERY:
-                    cur_user = handlers.recognize_user(self.context.call.from_user.id)
-                    
-                    # Today
-                    if self.context.call.data == "cb_today":
-                        bot.answer_callback_query(self.context.call.id, "Расписание на сегодня")
-                        self.handle_shedule("today")
-                    
-                    # Tomorrow
-                    if self.context.call.data == "cb_tomorrow":
-                        bot.answer_callback_query(self.context.call.id, "Расписание на завтра")
-                        self.handle_shedule("tomorrow")
-                    
-                    # All weak
-                    if self.context.call.data == "cb_week":
-                        bot.answer_callback_query(self.context.call.id, "Расписание на неделю")
-                        self.handle_shedule("week")
-                   
-                    else:
-                        bot.answer_callback_query(self.context.call.id,
-                                                 "Internal callback function error")
+                # Tomorrow
+                if self.context.call.data == "cb_tomorrow":
+                    bot.answer_callback_query(self.context.call.id, "Расписание на завтра")
+                    self.handle_shedule("tomorrow")
                 
-                # Send shedule changes to user
-                elif self.context.action == sheduler.actions.CHANGES_HANDLER:
-                    cur_user = handlers.recognize_user(self.context.message.from_user.id)
+                # All weak
+                if self.context.call.data == "cb_week":
+                    bot.answer_callback_query(self.context.call.id, "Расписание на неделю")
+                    self.handle_shedule("week")
+                
+                else:
+                    bot.answer_callback_query(self.context.call.id,
+                                                "Internal callback function error")
+            
+            # Send shedule changes to user
+            elif self.context.action == sheduler.actions.CHANGES_HANDLER:
+                cur_user = handlers.recognize_user(self.context.message.from_user.id)
 
-                    if cur_user:
-                        print("command received")
-                        self.handle_changes()
-                if (sheduler.pipeline.qsize()) == 0:
-                    sheduler.shedule_event.clear()
-            else:
-                logging.debug("[{self.ident)}] Thread locked")
-                sheduler.shedule_event.wait()
-                logging.debug("[{self.ident)}] Thread unlocked")
-
+                if cur_user:
+                    print("command received (changes handler elif)")
+                    self.handle_changes()

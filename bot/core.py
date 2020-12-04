@@ -94,5 +94,3 @@ def changes_handler(message):
     sheduler.pipeline.put(sheduler.context(sheduler.actions.CHANGES_HANDLER, message))
     sheduler.shedule_event.set()
 
-# if __name__ == "__main__":
-#     tg_bot.polling()
