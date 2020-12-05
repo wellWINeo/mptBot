@@ -267,7 +267,12 @@ class mptPage:
         group -- string with correct name of group, like it typed on the site
         day   -- number of the day week, starts by 1
         """
-        return self.__naviToGroup(group).find_all("thead")[day-1].h4.text 
+        
+        # TODO: Make error raising
+        try:
+            return self.__naviToGroup(group).find_all("thead")[day-1].h4.text
+        except: 
+            return ""
 
     def __del__(self):
         self.updateDaemon.join()

@@ -5,12 +5,13 @@ from mptParser.mptShedule import mptPage
 import logging
 
 #hack to fix circular deps
-tg_bot = telebot.TeleBot(config.bot_token)
+tg_bot = telebot.AsyncTeleBot(config.bot_token)
 
 import bot.markup as bot_markup
 import bot.sheduler as sheduler
 import bot.handlers as handlers
 import bot.db as db
+import bot.utils as utils 
 
 mpt = mptPage()
 
@@ -49,15 +50,14 @@ def answer_message_handler(message):
     
     if user:
         if user.group == None:
-            sheduler.pipeline.put(sheduler.context(sheduler.actions.WAIT_GROUP_CHOOSE, message))
-            sheduler.shedule_event.set()
+            utils.wait_group_choose(message)
             logging.debug("[" + str(message.from_user.id) + "] " + "User hasn't group")
             user.group = "-"
             db.users_db.update({"group" : "-"}, db.User.user_id == user.user_id)
 
         elif user.group == "-":
             logging.debug("[" + str(message.from_user.id) + "] " + "User filled")
-            sheduler.pipeline.put(sheduler.context(sheduler.actions.WAIT_GROUP_ALREADY_CHOOSED, message))
+            utils.group_choosed(message)
             user.group = message.text
             db.users_db.update({"group" : message.text},
                                 db.User.user_id == user.user_id)
@@ -75,22 +75,18 @@ def help_handler(message):
                         else False)
 def shedule_handler(message):
     logging.debug("[" + str(message.from_user.id) + "] " +"Shedule command")
-    sheduler.pipeline.put(sheduler.context(sheduler.actions.SHEDULE_HANDLER, message))
-    sheduler.shedule_event.set()
+    utils.shedule_date(message)
 
 @tg_bot.callback_query_handler(func=lambda call: 
                                True if call.data[:3] == "cb_" 
                                else False)
 def callback_query(call):
     logging.debug("[" + str(call.message.from_user.id) + "] " + "Callback query received")
-    sheduler.pipeline.put(sheduler.context(sheduler.actions.CALLBACK_QUERY, call=call))
-    sheduler.shedule_event.set()
+    utils.shedule_handler(call)
 
 @tg_bot.message_handler(func=lambda message:
                         True if message.text in commands_tree["CHANGES"]
                         else False)
 def changes_handler(message):
     logging.debug("[" + str(message.from_user.id) + "] " + "Changes command")
-    sheduler.pipeline.put(sheduler.context(sheduler.actions.CHANGES_HANDLER, message))
-    sheduler.shedule_event.set()
-
+    utils.changes_handler(message)

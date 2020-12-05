@@ -8,7 +8,8 @@ import datetime
 mpt = mptParser.mptShedule.mptPage()
 
 def wait_group_choose(msg):
-    core.tg_bot.send_message(msg.chat.id, reply_markup=markup.group_choose_keyboard(mpt, msg.text))
+    core.tg_bot.send_message(msg.chat.id, "Выберите группу: ",
+                            reply_markup=markup.group_choose_keyboard(mpt, msg.text))
 
 def group_choosed(msg):
     core.tg_bot.send_message(msg.chat.id, "Отлично! Группа выбрана и сохранена",
@@ -27,8 +28,10 @@ def shedule_handler(call):
         if call.data != "cb_week":
             
             if call.data == "cb_today":
+                core.tg_bot.answer_callback_query(call.id, "Расписание на сегодня")
                 day_num = datetime.datetime.today()
             elif call.data == "cb_tomorrow":
+                core.tg_bot.answer_callback_query(call.id, "Расписание на завтра")
                 day_num = datetime.datetime.today() + datetime.timedelta(days=1)
             
             shedule_tree = mpt.getSheduleByDay(cur_user.group, day_num.isoweekday())
@@ -43,6 +46,7 @@ def shedule_handler(call):
             core.tg_bot.send_message(call.message.chat.id, text=text)
 
         else:
+            core.tg_bot.answer_callback_query(call.id, "Расписание на неделю")
             for d in range(1, 6):
                 shedule_tree = mpt.getSheduleByDay(cur_user.group, d)
 
