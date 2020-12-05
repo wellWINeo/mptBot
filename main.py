@@ -33,8 +33,6 @@ if __name__ == "__main__":
     logging.basicConfig(level=log_level, filename=config.logs_path, filemode="w")
     
     logging.info("Bot started!")
-    #ThreadPool = bot.sheduler.ThreadPool(bot.handlers.driverThread, config.exec_threads)
-    #ThreadPool.start()
     if config.debug:
         print(mem_heap.heap())
     core_bot.tg_bot.polling(none_stop=True)
