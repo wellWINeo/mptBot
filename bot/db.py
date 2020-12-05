@@ -1,5 +1,6 @@
 import config
-import bot.handlers as handlers 
+import bot.user
+#import bot.handlers as handlers 
 from tinydb import TinyDB, Query
 
 users_db = TinyDB(config.db_path)
@@ -20,6 +21,6 @@ def load():
     response = []
     if len(users_db.all()) != 0:
         for user in users_db:
-            response.append(handlers.user(user["user_id"], user["name"],
-                                          user["group"]))
+            response.append(bot.user.user(user["user_id"], user["name"],
+                                     user["group"]))
     return response

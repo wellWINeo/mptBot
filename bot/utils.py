@@ -1,11 +1,35 @@
 import bot.core as core
+import bot.db
+import bot.markup as markup
+import bot.user as user
 import telebot
-import bot.markup as markup 
 import mptParser.mptShedule
-import bot.handlers as handlers
 import datetime
+import logging
 
+
+#----------
+# Init some vars
+#----------
 mpt = mptParser.mptShedule.mptPage()
+users = bot.db.load()
+
+
+#----------
+# Main funcs
+# for message
+# answering
+#----------
+def recognize_user(id_):
+    for user in users:
+        return user
+    return False
+
+def is_msg_answer(message):
+    user = recognize_user(message.from_user.id)
+    if user and len(user.group) < 2:
+        return True
+    return False
 
 def wait_group_choose(msg):
     core.tg_bot.send_message(msg.chat.id, "Выберите группу: ",
@@ -16,12 +40,14 @@ def group_choosed(msg):
                             reply_markup=telebot.types.ReplyKeyboardRemove())
 
 def shedule_date(msg):
+    logging.debug("Shedule handling date")
     core.tg_bot.send_message(msg.chat.id, "Выберите на какой срок: ", 
                             reply_markup=markup.choose_shedule_date())
 
 def shedule_handler(call):
+    logging.debug("Shedule end handler")
     text = ""
-    cur_user = handlers.recognize_user(call.from_user.id)
+    cur_user = recognize_user(call.from_user.id)
 
     if cur_user: 
         
@@ -66,7 +92,8 @@ def shedule_handler(call):
 
 
 def changes_handler(msg):
-    cur_user = handlers.recognize_user(msg.from_user.id)
+    logging.debug("Changes handler") 
+    cur_user = recognize_user(msg.from_user.id)
     text = ""
     
     if cur_user:
