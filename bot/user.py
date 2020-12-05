@@ -3,7 +3,7 @@ class user():
     name: str
     group: str
 
-    def __init__(self, _id, _name, _group=None):
+    def __init__(self, _id, _name, _group=""):
         self.user_id = _id
         self.name = _name
         self.group = _group

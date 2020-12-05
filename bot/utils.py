@@ -27,7 +27,7 @@ def recognize_user(id_):
 
 def is_msg_answer(message):
     user = recognize_user(message.from_user.id)
-    if user and len(user.group) < 2:
+    if len(user.group) < 2:
         return True
     return False
 

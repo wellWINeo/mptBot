@@ -57,7 +57,7 @@ def answer_message_handler(message):
     user = utils.recognize_user(message.from_user.id)
     
     if user:
-        if user.group == None:
+        if user.group == "":
             utils.wait_group_choose(message)
             logging.debug("[" + str(message.from_user.id) + "] " + "User hasn't group")
             user.group = "-"
@@ -69,6 +69,8 @@ def answer_message_handler(message):
             user.group = message.text
             db.users_db.update({"group" : message.text},
                                 db.User.user_id == user.user_id)
+    else:
+        tg_bot.send_message(message.chat.id, "Something went wrong")
 
 
 #----------------
