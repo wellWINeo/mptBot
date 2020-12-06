@@ -68,7 +68,7 @@ def shedule_handler(call):
                 for i in shedule_tree:
                     text += f"[{i[0]}] {i[1]}, {i[2]}\n"
             else:
-                text += "На сегодня предметов не найдено!"
+                text += "Предметов не найдено!"
             core.tg_bot.send_message(call.message.chat.id, text=text)
 
         else:

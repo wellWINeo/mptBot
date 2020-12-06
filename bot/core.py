@@ -17,10 +17,12 @@ from bot.user import user
 # COMMANDS
 #----------------
 commands_tree = {
-        "START": ["start", "/start"],
-        "SHEDULE": ["shedule", "/shedule", "расписание", "/расписание", "Расписание"],
-        "CHANGES": ["changes", "/changes", "замены", "/замены", "Замены"],
-        "HELP": ["help", "/help", "помощь", "/помощь", "Помощь"]}
+        "START": ("start", "/start"),
+        "SHEDULE": ("shedule", "/shedule", "расписание", "/расписание", "Расписание"),
+        "CHANGES": ("changes", "/changes", "замены", "/замены", "Замены"),
+        "HELP": ("help", "/help", "помощь", "/помощь", "Помощь"),
+        "PING": ("ping", "/ping", "Ping", "пинг", "Пинг"),
+        "DEL": ("/del", "del", "delete", "/delete")}
 
 
 #----------------
@@ -82,6 +84,33 @@ def answer_message_handler(message):
 def help_handler(message):
     logging.debug("[" + str(message.from_user.id) + "]" +"help command")
     tg_bot.send_message(message.chat.id, "help_placeholder")
+
+
+
+#----------------
+# PING
+#----------------
+@tg_bot.message_handler(func=lambda message:
+                        True if message.text in commands_tree["PING"]
+                        else False)
+def ping_handler(message):
+    tg_bot.send_message(message.chat.id, "Еще здесь <3")
+    
+
+#----------------
+# DELETE
+# user from db
+#----------------
+@tg_bot.message_handler(func=lambda message:
+                        True if message.text in commands_tree["DEL"]
+                        else False)
+def delete_handler(message):
+    try:
+        db.remove_user(message.from_user.id)
+        utils.users.remove(utils.recognize_user(message.from_user.id))
+        tg_bot.send_message(message.chat.id, "Вас больше нет в базе данных")
+    except:
+        tg_bot.send_message(message.chat.id, "Не удалось удалить, возможно вас нет в базе данных")
 
 
 #----------------
