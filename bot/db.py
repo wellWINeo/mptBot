@@ -1,6 +1,5 @@
 import config
 import bot.user
-#import bot.handlers as handlers 
 from tinydb import TinyDB, Query
 
 users_db = TinyDB(config.db_path)

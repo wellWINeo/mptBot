@@ -22,7 +22,8 @@ commands_tree = {
         "CHANGES": ("changes", "/changes", "замены", "/замены", "Замены"),
         "HELP": ("help", "/help", "помощь", "/помощь", "Помощь"),
         "PING": ("ping", "/ping", "Ping", "пинг", "Пинг"),
-        "DEL": ("/del", "del", "delete", "/delete")}
+        "DEL": ("/del", "del", "delete", "/delete"),
+        "ABOUT" : ("/about", "about", "About")}
 
 
 #----------------
@@ -33,10 +34,10 @@ commands_tree = {
                         else False)
 def start_handler(message):
     logging.debug("[" + str(message.from_user.id) + "] " + "Bot received \"start\" command")
-    tg_bot.reply_to(message, "Привет, бот запущен!\nЕго цель - удобный просмотр расписания МПТ, \
-а также он предупреждает о заменах.\n \
-Для того чтобы узнать о комманда введите:\n \
-/help")
+    tg_bot.reply_to(message, "Привет, бот запущен!\nЕго цель - удобный просмотр " \
+                             "расписания МПТ, а также он предупреждает о заменах.\n " \
+                             "Для того чтобы узнать о комманда введите:\n " \
+                             "/help")
     logging.debug("[" + str(message.from_user.id) + "] " + "Initial answer on \"start\" command sent")
     if utils.recognize_user(message.from_user.id) == False:
         logging.debug("[" + str(message.from_user.id) + "] " + "User not present in db")
@@ -83,8 +84,20 @@ def answer_message_handler(message):
                         else False)
 def help_handler(message):
     logging.debug("[" + str(message.from_user.id) + "]" +"help command")
-    tg_bot.send_message(message.chat.id, "help_placeholder")
-
+    tg_bot.send_message(message.chat.id, "Здесь представлены основные команды бота: \n" \
+                                         "\t/start - запускает бота и регистрирует " \
+                                         "пользователя если он еще не зарегистрирован\n" \
+                                         "\t/расписание - отправляет сообщение с меню" \
+                                         "выбора дня для показа расписания\n" \
+                                         "\t/замены - отправляет список замен (если есть)" \
+                                         "на текущий день\n"
+                                         "\t/ping - просто проверка, что бот еще жив\n" \
+                                         "\t/del - удаление пользователя из базы данных\n" \
+                                         "\t/about - увидеть доп. информацию о боте\n"
+                                         "\t/help - чтобы увидеть еще раз это сообщение\n"
+                                         "P.S. некоторые команды допускают несколько " \
+                                         "вариантов написания, для более подробной информации" \
+                                         "смотрите \'commands_tree\' в bot/core.py")
 
 
 #----------------
@@ -111,6 +124,24 @@ def delete_handler(message):
         tg_bot.send_message(message.chat.id, "Вас больше нет в базе данных")
     except:
         tg_bot.send_message(message.chat.id, "Не удалось удалить, возможно вас нет в базе данных")
+
+
+#----------------
+# ABOUT
+#----------------
+@tg_bot.message_handler(func=lambda message:
+                        True if message.text in commands_tree["ABOUT"]
+                        else False)
+def about_handler(message):
+    logging.debug("Handling /about command")
+    tg_bot.send_message(message.chat.id, "mptBot - свободный телеграмм бот с открытым " \
+                                         "исходным кодом под лицензией MPL 2.0 для " \
+                                         "расписания МПТ, которое парсится с сайта.\n"
+                                         f"Версия: {config.version}\n" \
+                                         "Исходный код: github.com/wellWINeo/mptBot \n"
+                                         "В случае обнаружения ошибок, просьба сообщить, " \
+                                         "создав issue \n" \
+                                         "Чтобы увидеть список команд: /help")
 
 
 #----------------
