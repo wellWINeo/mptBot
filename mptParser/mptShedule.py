@@ -72,14 +72,14 @@ class mptPage:
         """Returns count of current week (числитель/знаменатель) """
         try:
             self.lock.acquire()
-            response = self.pageShedule.find("span", class_ = "label label-info")
+            response = self.pageShedule.find("span", class_ = "label label-danger").text
             self.lock.release()
 
             return response
 
         except AttributeError:
             logging.error("Attribute erro in getWeekCount()")
-            return "Can't get week count"
+            return None
 
     #
     # UNSAFE 
@@ -179,7 +179,7 @@ class mptPage:
         Method to get today changes
         ---------------------------
         Params:
-            -- $group = string wit correct name of group like it type on the site 
+            -- group = string wit correct name of group like it type on the site 
         
         ---------------------------
         Returns:

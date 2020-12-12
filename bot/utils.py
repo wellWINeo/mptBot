@@ -27,8 +27,9 @@ def recognize_user(id_):
 
 def is_msg_answer(message):
     user = recognize_user(message.from_user.id)
-    if len(user.group) < 2:
-        return True
+    if user:
+        if len(user.group) < 2:
+            return True
     return False
 
 def wait_group_choose(msg):
@@ -50,7 +51,12 @@ def shedule_handler(call):
     cur_user = recognize_user(call.from_user.id)
 
     if cur_user: 
-        
+        week_num = mpt.getWeekCount()
+        if week_num != None:
+            text = f"[{week_num}] "
+        else:
+            text = f"Can't get "
+
         if call.data != "cb_week":
             
             if call.data == "cb_today":

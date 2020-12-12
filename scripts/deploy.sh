@@ -11,6 +11,6 @@ set TARGETPATH=$4
 alias ssh="ssh -i ~/.ssh/$KEY"
 echo "ssh -i ~/.ssh/$KEY"
 
-cd $DIRPATH; tar czf - $DIRNAME | ssh $USER_LOGIN@$HOST '(cd '$TARGETPATH'; \
-    rm -rf *; tar xzf -)'
+cd $DIRPATH; tar czf - $DIRNAME | ssh $USER_LOGIN@$HOST '(cd '$TARGETPATH'&& \
+    rm -rf * && tar xzf -)'
 ssh $USER_LOGIN@$HOST "cd $TARGETPATH/$DIRNAME; make setup"
