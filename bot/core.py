@@ -8,10 +8,10 @@ import logging
 tg_bot = telebot.AsyncTeleBot(config.bot_token)
 
 import bot.markup as bot_markup
-import bot.db as db
+import bot.user as users
 import bot.utils as utils 
-from bot.user import user
 
+db = users.users_db(config.db_path)
 
 #----------------
 # COMMANDS
@@ -39,39 +39,42 @@ def start_handler(message):
                              "Для того чтобы узнать о комманда введите:\n " \
                              "/help")
     logging.debug("[" + str(message.from_user.id) + "] " + "Initial answer on \"start\" command sent")
-    if utils.recognize_user(message.from_user.id) == False:
+    if db.get_user(message.from_user.id) == None:
         logging.debug("[" + str(message.from_user.id) + "] " + "User not present in db")
         tg_bot.send_message(message.chat.id, "Выберите направление: ",
             reply_markup=bot_markup.direction_choose_keyboard())
         logging.debug("[" + str(message.from_user.id) + "] " + "Bot send keyboard markup")
 
-        new_user = user(message.from_user.id, message.from_user.first_name)
-        utils.users.append(new_user)
+        new_user = users.user(message.from_user.id, message.from_user.first_name,
+                              message.chat.id)
         db.add_user(new_user)
 
 #----------------
 # Receiving anwer about
 # user's group direction
 #----------------
-@tg_bot.message_handler(func= lambda message: utils.is_msg_answer(message))
+@tg_bot.message_handler(func= lambda message: 
+                        True if db.get_user(message.from_user.id) != None and 
+                        db.get_user(message.from_user.id).status < 3
+                        else False)
 def answer_message_handler(message):
     logging.debug("[" + str(message.from_user.id) + "] " + "Received answer on dir choosing")
 
-    user = utils.recognize_user(message.from_user.id)
+    user = db.get_user(message.from_user.id)
     
-    if user:
-        if user.group == "":
+    if user != None:
+        if user.status == users.status.UNKNOWN:
             utils.wait_group_choose(message)
             logging.debug("[" + str(message.from_user.id) + "] " + "User hasn't group")
-            user.group = "-"
-            db.users_db.update({"group" : "-"}, db.User.user_id == user.user_id)
+            user.status = users.status.NO_GROUP
+            db.update(user)
 
-        elif user.group == "-":
+        elif user.status == users.status.NO_GROUP:
             logging.debug("[" + str(message.from_user.id) + "] " + "User filled")
             utils.group_choosed(message)
             user.group = message.text
-            db.users_db.update({"group" : message.text},
-                                db.User.user_id == user.user_id)
+            user.status = users.status.COMPLETE
+            db.update(user)
     else:
         tg_bot.send_message(message.chat.id, "Something went wrong")
 
@@ -119,8 +122,7 @@ def ping_handler(message):
                         else False)
 def delete_handler(message):
     try:
-        db.remove_user(message.from_user.id)
-        utils.users.remove(utils.recognize_user(message.from_user.id))
+        db.del_user(message.from_user.id)
         tg_bot.send_message(message.chat.id, "Вас больше нет в базе данных")
     except:
         tg_bot.send_message(message.chat.id, "Не удалось удалить, возможно вас нет в базе данных")

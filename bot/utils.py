@@ -1,7 +1,5 @@
 import bot.core as core
-import bot.db
 import bot.markup as markup
-import bot.user as user
 import telebot
 import mptParser.mptShedule
 import datetime
@@ -12,7 +10,6 @@ import logging
 # Init some vars
 #----------
 mpt = mptParser.mptShedule.mptPage()
-users = bot.db.load()
 
 
 #----------
@@ -20,17 +17,13 @@ users = bot.db.load()
 # for message
 # answering
 #----------
-def recognize_user(id_):
-    for user in users:
-        return user
-    return False
 
-def is_msg_answer(message):
-    user = recognize_user(message.from_user.id)
-    if user:
-        if len(user.group) < 2:
-            return True
-    return False
+# def is_msg_answer(message):
+#     user = recognize_user(message.from_user.id)
+#     if user:
+#         if len(user.group) < 2:
+#             return True
+#     return False
 
 def wait_group_choose(msg):
     core.tg_bot.send_message(msg.chat.id, "Выберите группу: ",
@@ -48,9 +41,9 @@ def shedule_date(msg):
 def shedule_handler(call):
     logging.debug("Shedule end handler")
     text = ""
-    cur_user = recognize_user(call.from_user.id)
+    cur_user = core.db.get_user(call.from_user.id)
 
-    if cur_user: 
+    if cur_user != None: 
         week_num = mpt.getWeekCount()
         if week_num != None:
             text = f"[{week_num}] "
@@ -99,10 +92,10 @@ def shedule_handler(call):
 
 def changes_handler(msg):
     logging.debug("Changes handler") 
-    cur_user = recognize_user(msg.from_user.id)
+    cur_user = core.db.get_user(msg.from_user.id)
     text = ""
     
-    if cur_user:
+    if cur_user != None:
         changes_tree = mpt.getChangesByDay(cur_user.group)
         
         if len(changes_tree) != 0:

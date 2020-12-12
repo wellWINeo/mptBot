@@ -27,8 +27,7 @@ def choose_shedule_date():
     markup.add(
             types.InlineKeyboardButton("На сегодня", callback_data="cb_today"),
             types.InlineKeyboardButton("На завтра", callback_data="cb_tomorrow"),
-            types.InlineKeyboardButton("На неделю", callback_data="cb_week")
-            )
+            types.InlineKeyboardButton("На неделю", callback_data="cb_week"))
     
     return markup
 

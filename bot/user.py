@@ -1,9 +1,58 @@
-class user():
+from enum import IntEnum, auto
+from tinydb import Query, TinyDB
+
+class status(IntEnum):
+    UNKNOWN = auto()
+    NO_GROUP = auto()
+    COMPLETE = auto()
+
+
+class user:
     user_id: int
     name: str
-    group: str
+    group = ""
+    last_chat_id: str
 
-    def __init__(self, _id, _name, _group=""):
+    def __init__(self, _id, _name, _chat):
         self.user_id = _id
         self.name = _name
-        self.group = _group
+        self.last_chat_id = _chat
+        self.status = status.UNKNOWN
+
+
+class users_db():
+    db = None
+    query = Query()
+
+    def __init__(self, path):
+        self.db = TinyDB(path)
+
+    def get_user(self, _id):
+        json_data = self.db.get(self.query.user_id == _id)
+        if json_data != None:
+            response = user(json_data["user_id"], json_data["name"], 
+                            json_data["last_chat_id"])
+            response.group = json_data["group"]
+            response.status = status(json_data["status"])
+            return response
+        return None
+        
+    def add_user(self, instance):
+        self.db.insert({
+            "user_id": instance.user_id,
+            "name" : instance.name,
+            "group": instance.group,
+            "last_chat_id": instance.last_chat_id,
+            "status": instance.status.value})
+
+    def del_user(self, _id):
+        self.db.remove(self.query.user_id == _id)
+
+    def update(self, instance):
+        self.db.update({"user_id": instance.user_id,
+                        "name": instance.name,
+                        "group": instance.group,
+                        "last_chat_id": instance.last_chat_id,
+                        "status": instance.status},
+                        self.query.user_id == instance.user_id)
+

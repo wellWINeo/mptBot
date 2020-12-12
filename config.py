@@ -9,5 +9,6 @@ logs_path = "logs/sys_logs.txt"
 
 # Bool value for log level
 debug = True
+profiler = True
 
-version = "rc1"
+version = "rc3"
