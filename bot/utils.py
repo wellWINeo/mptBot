@@ -4,7 +4,7 @@ import telebot
 import mptParser.mptShedule
 import datetime
 import logging
-
+import time
 
 #----------
 # Init some vars
@@ -72,22 +72,26 @@ def shedule_handler(call):
 
         else:
             core.tg_bot.answer_callback_query(call.id, "Расписание на неделю")
+            core.tg_bot.send_message(cur_user.user_id, "Номер недели - " \
+                                                        f"{mpt.getWeekCount()}")
             for d in range(1, 6):
                 shedule_tree = mpt.getSheduleByDay(cur_user.group, d)
 
                 if shedule_tree != None:
-                    text += f"Day: {d}\n"
+                    text = f"{mpt.getHeader(cur_user.group, d)}\n"
                     text += f"---------------\n"
                     
                     for i in shedule_tree:
-                        text +=f"[{i[0]} {i[1]}, {i[2]}]\n"
+                        text +=f"[{i[0]} {i[1]}, {i[2]}\n"
                 else:
                     text += "Предметы не найдены!"
-                core.tg_bot.send_message(cur_user.group, text=text)
+                core.tg_bot.send_message(cur_user.user_id, text=text)
+                time.sleep(0.25)    
 
     else:
-        core.tg_bot.send_message(call.message.chat.id, 
-                                "Сперва необходимо выполнить  \"/start\" и выбрать группу")
+        core.tg_bot.send_message(call.message.chat.id, "Сперва необходимо " \
+                                                       "выполнить  \"/start\" " \
+                                                       "и выбрать группу")
 
 
 def changes_handler(msg):
