@@ -55,26 +55,42 @@ def start_handler(message):
 #----------------
 @tg_bot.message_handler(func= lambda message: 
                         True if db.get_user(message.from_user.id) != None and 
-                        db.get_user(message.from_user.id).status < 3
+                        db.get_user(message.from_user.id).status < users.status.COMPLETE
                         else False)
 def answer_message_handler(message):
-    logging.debug("[" + str(message.from_user.id) + "] " + "Received answer on dir choosing")
-
+    logging.debug(f"[{message.from_user.id}] Received answer on dir choosing")
     user = db.get_user(message.from_user.id)
-    
+
     if user != None:
         if user.status == users.status.UNKNOWN:
-            utils.wait_group_choose(message)
-            logging.debug("[" + str(message.from_user.id) + "] " + "User hasn't group")
-            user.status = users.status.NO_GROUP
-            db.update(user)
+
+            groups = utils.mpt.get_groups_by_dir(message.text)
+            
+            if len(groups) == 0:
+                logging.debug(f"[{user.user_id}] Invalid dir")
+                tg_bot.send_message(message.chat.id, "Неккоректный ответ, " \
+                                                     "попробуйте еще раз",
+                                    reply_markup=bot_markup.direction_choose_keyboard())
+            else:
+                utils.wait_group_choose(message, groups)
+                logging.debug(f"[{message.from_user.id}] User hasn't group")
+                user.status = users.status.NO_GROUP
+                user.group = message.text
+                db.update(user)
 
         elif user.status == users.status.NO_GROUP:
-            logging.debug("[" + str(message.from_user.id) + "] " + "User filled")
-            utils.group_choosed(message)
-            user.group = message.text
-            user.status = users.status.COMPLETE
-            db.update(user)
+            groups = utils.mpt.get_groups_by_dir(user.group)
+            logging.debug(f"[{message.from_user.id}] User fields completed")
+            
+            if message.text not in groups:
+                logging.debug(f"[{user.user_id}] Invalid group")
+                tg_bot.send_message(message.chat.id, "Неккоректный номер группы," \
+                                                     "выберите, используя клавиатуру")
+            else:
+                utils.group_choosed(message)
+                user.group = message.text
+                user.status = users.status.COMPLETE
+                db.update(user)
     else:
         tg_bot.send_message(message.chat.id, "Something went wrong")
 

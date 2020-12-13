@@ -81,17 +81,12 @@ class mptPage:
             logging.error("Attribute erro in getWeekCount()")
             return None
 
-    #
-    # UNSAFE 
-    #
     def __tab_num(self, target: str, headers: list):
         for num in range(0, len(headers)):
             if headers[num].a.text == target:
                 return num
         return None
     
-    # TODO 
-    # make spaces deleting via regex
     def __rm_spaces(self, string: str):
         while "  " in string:
             string = string.replace("  ", " ")[1::]
@@ -106,27 +101,19 @@ class mptPage:
         num = self.__tab_num(direction, tabs[0].find_all("li"))
         tabs = tabs[1::]
         
-        groups = (list(tabs[num]))[1::2]
+        try:
+            groups = (list(tabs[num]))[1::2]
+        except:
+            groups = []
+
         response = []
 
         for group in groups:
             tmp = group.a.text
             tmp = self.__rm_spaces(tmp)
-            tmp = tmp.split(",")
-
-            if len(tmp) == 1:
-                self.__rm_spaces(tmp[0])
-                response.append(tmp[0])
-            elif len(tmp) > 1:
-                for elem in tmp:
-                    self.__rm_spaces(elem)
-                    response.append(elem)
-            else:
-                pass
+            self.__rm_spaces(tmp)
+            response.append(tmp)
         return response
-    #
-    # /UNSAFE
-    #
 
     def __naviToGroup(self, group: str):
         """Privete method for navigation in soup to group (for shedule)"""

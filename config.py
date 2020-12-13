@@ -1,3 +1,5 @@
+# Python config file for mptBot
+
 bot_token = ""
 
 # In seconds
@@ -11,4 +13,4 @@ logs_path = "logs/sys_logs.txt"
 debug = True
 profiler = True
 
-version = "rc3"
+version = "rc4"

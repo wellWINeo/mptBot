@@ -18,16 +18,9 @@ mpt = mptParser.mptShedule.mptPage()
 # answering
 #----------
 
-# def is_msg_answer(message):
-#     user = recognize_user(message.from_user.id)
-#     if user:
-#         if len(user.group) < 2:
-#             return True
-#     return False
-
-def wait_group_choose(msg):
+def wait_group_choose(msg, groups):
     core.tg_bot.send_message(msg.chat.id, "Выберите группу: ",
-                            reply_markup=markup.group_choose_keyboard(mpt, msg.text))
+                            reply_markup=markup.item_chooser_keyboard(mpt, groups))
 
 def group_choosed(msg):
     core.tg_bot.send_message(msg.chat.id, "Отлично! Группа выбрана и сохранена",
@@ -46,7 +39,7 @@ def shedule_handler(call):
     if cur_user != None: 
         week_num = mpt.getWeekCount()
         if week_num != None:
-            text = f"[{week_num}] "
+            text = f"{week_num} - "
         else:
             text = f"Can't get "
 

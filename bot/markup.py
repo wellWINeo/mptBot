@@ -1,25 +1,28 @@
 from telebot import types
 import math
 
-def group_choose_keyboard(mpt, direction):
-    groups = mpt.get_groups_by_dir(direction)
+def item_chooser_keyboard(mpt, items):
+    # groups = mpt.get_groups_by_dir(direction)
     markup = types.ReplyKeyboardMarkup(row_width=3)
     
-    for i in range(0, len(groups) - len(groups) % 3, 3):
+    for i in range(0, len(items) - len(items) % 3, 3):
         markup.row(
-                types.KeyboardButton(groups[i]),
-                types.KeyboardButton(groups[i+1]),
-                types.KeyboardButton(groups[i+2]))
-    mod = len(groups) % 3
+                types.KeyboardButton(items[i]),
+                types.KeyboardButton(items[i+1]),
+                types.KeyboardButton(items[i+2]))
+    mod = len(items) % 3
 
     if mod == 2:
         markup.row( 
-            types.KeyboardButton(groups[len(groups)-2]),
-            types.KeyboardButton(groups[len(groups)-1]))
+            types.KeyboardButton(items[len(items)-2]),
+            types.KeyboardButton(items[len(items)-1]))
     elif mod == 1:
-        markup.row(types.KeyboardButton(groups[len(groups)-1]))
+        markup.row(types.KeyboardButton(items[len(items)-1]))
     
     return markup
+
+def group_choose_keyboard(a, b):
+    pass
 
 def choose_shedule_date():
     markup = types.InlineKeyboardMarkup(row_width=3)
