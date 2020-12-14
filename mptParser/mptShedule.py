@@ -72,14 +72,21 @@ class mptPage:
         """Returns count of current week (числитель/знаменатель) """
         try:
             self.lock.acquire()
-            response = self.pageShedule.find("span", class_ = "label label-danger").text
+            response = self.pageShedule.find("span", class_="label label-danger")
             self.lock.release()
-
-            return response
+            
+            if response != None:
+                return response.text
+            else:
+                response = self.pageShedule.find("span", class_="label label-info")
+                if response != None:
+                    return response.text
+                else:
+                    return "¯\\_(ツ)_/¯"
 
         except AttributeError:
             logging.error("Attribute erro in getWeekCount()")
-            return None
+            return "¯\\_(ツ)_/¯"
 
     def __tab_num(self, target: str, headers: list):
         for num in range(0, len(headers)):

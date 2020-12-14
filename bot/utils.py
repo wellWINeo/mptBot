@@ -38,10 +38,7 @@ def shedule_handler(call):
 
     if cur_user != None: 
         week_num = mpt.getWeekCount()
-        if week_num != None:
-            text = f"{week_num} - "
-        else:
-            text = f"Can't get "
+        text = f"{week_num}: "
 
         if call.data != "cb_week":
             
