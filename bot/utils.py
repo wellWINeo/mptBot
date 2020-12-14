@@ -55,7 +55,12 @@ def shedule_handler(call):
 
             if shedule_tree != None:
                 for i in shedule_tree:
-                    text += f"[{i[0]}] {i[1]}, {i[2]}\n"
+                    if len(i[1]) == 1:
+                        text += f"[{i[0][0]}] {i[1][0]}, {i[2][0]}\n"
+                    else:
+                        text += f"[{i[0][0]}] {i[1][0]}/{i[1][1]}, {i[2][0]}/" \
+                                f"{i[2][1]}\n"
+
             else:
                 text += "Предметов не найдено!"
             core.tg_bot.send_message(call.message.chat.id, text=text)
@@ -72,7 +77,13 @@ def shedule_handler(call):
                     text += f"---------------\n"
                     
                     for i in shedule_tree:
-                        text +=f"[{i[0]} {i[1]}, {i[2]}\n"
+                        if len(i[1]) == 1:
+                            text += f"[{i[0][0]}] {i[1][0]}, {i[2][0]}\n"
+                        else:
+                            print(i)
+                            text += f"[{i[0][0]}] {i[1][0]}/{i[1][1]}, {i[2][0]}/" \
+                                    f"{i[2][1]}\n"
+
                 else:
                     text += "Предметы не найдены!"
                 core.tg_bot.send_message(cur_user.user_id, text=text)

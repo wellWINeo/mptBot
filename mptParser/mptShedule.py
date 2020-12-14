@@ -226,7 +226,6 @@ class mptPage:
         try:
             bodies = self.__naviToGroup(group).find_all("tr")
         except:
-
             self.sys_log.write("[Error] in calling __naviToGroup")
 
 
@@ -239,8 +238,18 @@ class mptPage:
                     tmp.append([])
         
                     for elem in lesson:
-                        append_elem = re.sub(" +", " ", elem.text)
-                        tmp[len(tmp) - 1].append(append_elem)
+                        
+                        if len(elem) == 1:
+                            append_elem = [re.sub(" +", " ", elem.text)]
+                            tmp[len(tmp) - 1].append(append_elem)
+                        else:
+                            append_elem = []
+                            append_elem.append("{0}(Ч)".format(re.sub(" +", " ", 
+                                   elem.find("div", class_="label label-danger").text)))
+                            append_elem.append("{0}(З)".format(re.sub(" +", " ", 
+                                   elem.find("div", class_="label label-info").text)))
+                            
+                            tmp[len(tmp) - 1].append(append_elem)
                     i+= 1
         
                     if i >= len(bodies) or self.__checkTHead(bodies[i]):
