@@ -55,7 +55,7 @@ def start_handler(message):
 #----------------
 @tg_bot.message_handler(func= lambda message: 
                         True if db.get_user(message.from_user.id) != None and 
-                        db.get_user(message.from_user.id).status < users.status.COMPLETE
+                        db.get_user(message.from_user.id).status < users.status.ANON
                         else False)
 def answer_message_handler(message):
     logging.debug(f"[{message.from_user.id}] Received answer on dir choosing")
@@ -168,11 +168,31 @@ def about_handler(message):
 # choosing
 #----------------
 @tg_bot.message_handler(func=lambda message:
-                        True if message.text in commands_tree["SHEDULE"]
+                        True if message.text.split()[0] in commands_tree["SHEDULE"]
                         else False)
 def shedule_handler(message):
-    logging.debug("[" + str(message.from_user.id) + "] " +"Shedule command")
+    logging.debug("[{message.from_user.id}] Shedule command")
+    if db.get_user(message.from_user.id) == None and len(message.text.split()) > 1:
+        db.add_user(users.user(message.from_user.id, 
+                               message.from_user.first_name,
+                               message.chat.id,
+                               _group=message.text.split()[1],
+                               _status=users.status.ANON))
     utils.shedule_date(message)
+
+
+
+#----------------
+# Shedule handler
+# for custom group
+#----------------
+# @tg_bot.message_handler(func=lambda message:
+#                      True if len(message.text.split()) > 1 and
+#                      message.text.split[0] in commands_tree["SHEDULE"]
+#                      else False)
+# def custom_shedule_handler(message):
+#     logging.debug(f"[{message.from_user.id}] Custom shedule command")
+#     utils.custom_shedule_handler()
 
 
 #----------------

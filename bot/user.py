@@ -4,6 +4,7 @@ from tinydb import Query, TinyDB
 class status(IntEnum):
     UNKNOWN = auto()
     NO_GROUP = auto()
+    ANON = auto()
     COMPLETE = auto()
 
 
@@ -13,11 +14,12 @@ class user:
     group = ""
     last_chat_id: str
 
-    def __init__(self, _id, _name, _chat):
+    def __init__(self, _id, _name, _chat, _group=None, _status=status.UNKNOWN):
         self.user_id = _id
         self.name = _name
         self.last_chat_id = _chat
-        self.status = status.UNKNOWN
+        self.group = _group
+        self.status = _status
 
 
 class users_db():

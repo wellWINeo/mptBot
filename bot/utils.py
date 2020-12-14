@@ -1,5 +1,6 @@
 import bot.core as core
 import bot.markup as markup
+import bot.user as users
 import telebot
 import mptParser.mptShedule
 import datetime
@@ -33,13 +34,13 @@ def shedule_date(msg):
 
 def shedule_handler(call):
     logging.debug("Shedule end handler")
-    text = ""
+
     cur_user = core.db.get_user(call.from_user.id)
-
-    if cur_user != None: 
-        week_num = mpt.getWeekCount()
-        text = f"{week_num}: "
-
+    
+    week_num = mpt.getWeekCount()
+    text = f"{week_num}: "
+   
+    if cur_user != None:
         if call.data != "cb_week":
             
             if call.data == "cb_today":
@@ -67,7 +68,7 @@ def shedule_handler(call):
 
         else:
             core.tg_bot.answer_callback_query(call.id, "Расписание на неделю")
-            core.tg_bot.send_message(cur_user.user_id, "Номер недели - " \
+            core.tg_bot.send_message(call.message.chat.id, "Номер недели - " \
                                                         f"{mpt.getWeekCount()}")
             for d in range(1, 6):
                 shedule_tree = mpt.getSheduleByDay(cur_user.group, d)
@@ -86,13 +87,15 @@ def shedule_handler(call):
 
                 else:
                     text += "Предметы не найдены!"
-                core.tg_bot.send_message(cur_user.user_id, text=text)
-                time.sleep(0.25)    
-
+                core.tg_bot.send_message(call.message.chat.id, text=text)
+                time.sleep(0.25)
     else:
         core.tg_bot.send_message(call.message.chat.id, "Сперва необходимо " \
                                                        "выполнить  \"/start\" " \
                                                        "и выбрать группу")
+    
+    if cur_user.status == users.status.ANON:
+        core.db.del_user(cur_user.user_id)
 
 
 def changes_handler(msg):
