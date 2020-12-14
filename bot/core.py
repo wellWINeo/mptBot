@@ -172,12 +172,19 @@ def about_handler(message):
                         else False)
 def shedule_handler(message):
     logging.debug("[{message.from_user.id}] Shedule command")
-    if db.get_user(message.from_user.id) == None and len(message.text.split()) > 1:
-        db.add_user(users.user(message.from_user.id, 
-                               message.from_user.first_name,
-                               message.chat.id,
-                               _group=message.text.split()[1],
-                               _status=users.status.ANON))
+    cur_user = db.get_user(message.from_user.id)
+    if len(message.text.split()) > 1:
+        if cur_user == None:
+            db.add_user(users.user(message.from_user.id, 
+                                   message.from_user.first_name,
+                                   message.chat.id,
+                                   _group=message.text.split()[1],
+                                   _status=users.status.ANON))
+        else:
+            cur_user.comm = cur_user.group
+            cur_user.group = message.text.split()[1]
+            cur_user.status = users.status.ANOTHER
+            db.update(cur_user)
     utils.shedule_date(message)
 
 

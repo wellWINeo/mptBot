@@ -89,13 +89,19 @@ def shedule_handler(call):
                     text += "Предметы не найдены!"
                 core.tg_bot.send_message(call.message.chat.id, text=text)
                 time.sleep(0.25)
+    
+        if cur_user.status == users.status.ANON:
+            core.db.del_user(cur_user.user_id)
+        
+        elif cur_user.status == users.status.ANOTHER:
+            cur_user.status = users.status.COMPLETE
+            cur_user.group = cur_user.comm
+            cur_user.comm = str()
+    
     else:
         core.tg_bot.send_message(call.message.chat.id, "Сперва необходимо " \
                                                        "выполнить  \"/start\" " \
                                                        "и выбрать группу")
-    
-    if cur_user.status == users.status.ANON:
-        core.db.del_user(cur_user.user_id)
 
 
 def changes_handler(msg):

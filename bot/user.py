@@ -2,10 +2,11 @@ from enum import IntEnum, auto
 from tinydb import Query, TinyDB
 
 class status(IntEnum):
-    UNKNOWN = auto()
-    NO_GROUP = auto()
-    ANON = auto()
-    COMPLETE = auto()
+    UNKNOWN = auto()    # new user, just created
+    NO_GROUP = auto()   # user w/o group
+    ANON = auto()       # no logged in user, request shedule for group
+    ANOTHER = auto()    # logged in user requested shedule for another gorup
+    COMPLETE = auto()   # all user's filed filled
 
 
 class user:
@@ -13,6 +14,7 @@ class user:
     name: str
     group = ""
     last_chat_id: str
+    comm = str()
 
     def __init__(self, _id, _name, _chat, _group=None, _status=status.UNKNOWN):
         self.user_id = _id
