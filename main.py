@@ -10,7 +10,7 @@
 # students              #
 #########################
 
-import bot
+import bot.core
 import config
 import logging
 from mptParser import mptShedule
