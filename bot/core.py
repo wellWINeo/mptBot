@@ -23,7 +23,8 @@ commands_tree = {
         "HELP": ("help", "/help", "помощь", "/помощь", "Помощь"),
         "PING": ("ping", "/ping", "Ping", "пинг", "Пинг"),
         "DEL": ("/del", "del", "delete", "/delete"),
-        "ABOUT" : ("/about", "about", "About")}
+        "ABOUT" : ("/about", "about", "About"),
+        "ME": ("/me", "/Me", "me", "Me")}
 
 
 #----------------
@@ -45,8 +46,7 @@ def start_handler(message):
             reply_markup=bot_markup.direction_choose_keyboard())
         logging.debug("[" + str(message.from_user.id) + "] " + "Bot send keyboard markup")
 
-        new_user = users.user(message.from_user.id, message.from_user.first_name,
-                              message.chat.id)
+        new_user = users.user(message.from_user.id, message.from_user.first_name)
         db.add_user(new_user)
 
 #----------------
@@ -162,6 +162,26 @@ def about_handler(message):
                                          "Чтобы увидеть список команд: /help")
 
 
+
+#----------------
+# Send info
+# about user
+#----------------
+@tg_bot.message_handler(func=lambda message:
+                        True if message.text in commands_tree["ME"]
+                        else False)
+def me_handler(message):
+    logging.debug("Handling /me command")
+    
+    cur_user = db.get_user(message.from_user.id)
+
+    if cur_user != None:
+        tg_bot.send_message(message.chat.id, f"Имя - {cur_user.name}\n" \
+                                             f"ID - {cur_user.user_id}\n" \
+                                             f"Группа - {cur_user.group}")
+    else:
+        tg_bot.send_message(message.chat.id, "Вас еще нет в базе данных")
+
 #----------------
 # Sending callback
 # for shedule day
@@ -177,7 +197,6 @@ def shedule_handler(message):
         if cur_user == None:
             db.add_user(users.user(message.from_user.id, 
                                    message.from_user.first_name,
-                                   message.chat.id,
                                    _group=" ".join(message.text.split()[1:]),
                                    _status=users.status.ANON))
         else:
