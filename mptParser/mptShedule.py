@@ -8,7 +8,6 @@ import logging
 
 # own libs
 from mptParser import updater
-from logs import log
 
 class mptPage:
     """
@@ -49,9 +48,6 @@ class mptPage:
         self.update()
         
         self.updateDaemon.start()
-
-        self.sys_log = log.log("logs/sys_logs.txt")
-
 
 
     def update(self):
@@ -135,7 +131,7 @@ class mptPage:
                 if div.find("h3").text == group:
                     return div
             except:
-                self.sys_log.write("[error] AttributeError in _naviToGroup(), comparison")
+                logging.error("AttributeError in _naviToGroup(), comparison")
         return None
 
 
@@ -226,7 +222,7 @@ class mptPage:
         try:
             bodies = self.__naviToGroup(group).find_all("tr")
         except:
-            self.sys_log.write("[Error] in calling __naviToGroup")
+            logging.error("[Error] in calling __naviToGroup")
 
 
         for i in range(0, len(bodies) - 1):
@@ -279,9 +275,3 @@ class mptPage:
 
     def __del__(self):
         self.updateDaemon.join()
-        del self.sys_log
-
-# if __name__ == "__main__":
-#     mpt = mptPage()
-
-#     print(mpt.getSheduleByDay("П50-2-19", 1))

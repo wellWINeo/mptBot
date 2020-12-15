@@ -9,7 +9,6 @@
 # students
 
 from mptParser import mptShedule
-from logs import log
 import bot
 import bot.core as core_bot
 import time
@@ -38,6 +37,5 @@ if __name__ == "__main__":
  
     if config.profiler:
         print(mem_heap.heap())
-
     core_bot.tg_bot.polling(none_stop=True)
     logging.info("Bot stopped!")

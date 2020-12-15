@@ -13,4 +13,4 @@ logs_path = "logs/sys_logs.txt"
 debug = True
 profiler = True
 
-version = "rc4"
+version = "rc5"
