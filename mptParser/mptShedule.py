@@ -1,13 +1,10 @@
-
-# base libs
 import bs4
+import logging
+from mptParser import updater
 import requests
 import re
 from threading import Thread, RLock
-import logging
 
-# own libs
-from mptParser import updater
 
 class mptPage:
     """
@@ -237,15 +234,17 @@ class mptPage:
                         
                         if len(elem) == 1:
                             append_elem = [re.sub(" +", " ", elem.text)]
-                            tmp[len(tmp) - 1].append(append_elem)
-                        else:
+                            tmp[len(tmp)-1].append(append_elem)
+                        elif len(elem) > 1:
                             append_elem = []
                             append_elem.append("{0}(Ч)".format(re.sub(" +", " ", 
                                    elem.find("div", class_="label label-danger").text)))
                             append_elem.append("{0}(З)".format(re.sub(" +", " ", 
                                    elem.find("div", class_="label label-info").text)))
-                            
-                            tmp[len(tmp) - 1].append(append_elem)
+                            tmp[len(tmp)-1].append(append_elem)
+                        else:
+                            tmp[len(tmp)-1].append(" - ")
+                    
                     i+= 1
         
                     if i >= len(bodies) or self.__checkTHead(bodies[i]):

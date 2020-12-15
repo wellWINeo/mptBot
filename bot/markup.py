@@ -1,5 +1,4 @@
 from telebot import types
-import math
 
 def item_chooser_keyboard(mpt, items):
     # groups = mpt.get_groups_by_dir(direction)

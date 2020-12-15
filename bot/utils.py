@@ -1,10 +1,10 @@
 import bot.core as core
 import bot.markup as markup
 import bot.user as users
-import telebot
-import mptParser.mptShedule
 import datetime
 import logging
+import mptParser.mptShedule
+import telebot
 import time
 
 #----------
@@ -81,7 +81,6 @@ def shedule_handler(call):
                         if len(i[1]) == 1:
                             text += f"[{i[0][0]}] {i[1][0]}, {i[2][0]}\n"
                         else:
-                            print(i)
                             text += f"[{i[0][0]}] {i[1][0]}/{i[1][1]}, {i[2][0]}/" \
                                     f"{i[2][1]}\n"
 
