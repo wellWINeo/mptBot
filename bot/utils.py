@@ -59,8 +59,11 @@ def shedule_handler(call):
                     if len(i[1]) == 1:
                         text += f"[{i[0][0]}] {i[1][0]}, {i[2][0]}\n"
                     else:
-                        text += f"[{i[0][0]}] {i[1][0]}/{i[1][1]}, {i[2][0]}/" \
-                                f"{i[2][1]}\n"
+                        # output format:
+                        #               [num] lesson-name, teacher (Ч) \n
+                        #                     lesson-name, teacher (З) \n
+                        text += f"[{i[0][0]}] {i[1][0]}, {i[2][0]} (Ч)\n"
+                        text += f"{i[1][1]} {i[2][1]} (З)\n"
 
             else:
                 text += "Предметов не найдено!"
@@ -70,7 +73,7 @@ def shedule_handler(call):
             core.tg_bot.answer_callback_query(call.id, "Расписание на неделю")
             core.tg_bot.send_message(call.message.chat.id, "Номер недели - " \
                                                         f"{mpt.getWeekCount()}")
-            for d in range(1, 6):
+            for d in range(1, 7):
                 shedule_tree = mpt.getSheduleByDay(cur_user.group, d)
 
                 if shedule_tree != None:
@@ -81,8 +84,16 @@ def shedule_handler(call):
                         if len(i[1]) == 1:
                             text += f"[{i[0][0]}] {i[1][0]}, {i[2][0]}\n"
                         else:
-                            text += f"[{i[0][0]}] {i[1][0]}/{i[1][1]}, {i[2][0]}/" \
-                                    f"{i[2][1]}\n"
+                            # output format:
+                            #               [num] lesson-name, teacher (Ч) \n
+                            #                     lesson-name, teacher (З) \n
+                            text += f"[{i[0][0]}] {i[1][0]}, {i[2][0]} (Ч)\n"
+                            text += f"{i[1][1]} {i[2][1]} (З)\n"
+                        # if len(i[1]) == 1:
+                        #     text += f"[{i[0][0]}] {i[1][0]}, {i[2][0]}\n"
+                        # else:
+                        #     text += f"[{i[0][0]}] {i[1][0]}/{i[1][1]}, {i[2][0]}/" \
+                        #             f"{i[2][1]}\n"
 
                 else:
                     text += "Предметы не найдены!"

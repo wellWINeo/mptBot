@@ -1,5 +1,6 @@
 # Python config file for mptBot
 
+# TOKEN
 bot_token = ""
 
 # In seconds
@@ -11,6 +12,6 @@ logs_path = "logs/sys_logs.txt"
 
 # Bool value for log level
 debug = True
-profiler = True
+profiler = False
 
-version = "rc5"
+version = "1.0.2"

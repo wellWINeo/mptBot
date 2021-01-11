@@ -237,9 +237,13 @@ class mptPage:
                             tmp[len(tmp)-1].append(append_elem)
                         elif len(elem) > 1:
                             append_elem = []
-                            append_elem.append("{0}(Ч)".format(re.sub(" +", " ", 
+                            
+                            # numerator (числитель)
+                            append_elem.append("{0}".format(re.sub(" +", " ", 
                                    elem.find("div", class_="label label-danger").text)))
-                            append_elem.append("{0}(З)".format(re.sub(" +", " ", 
+
+                            # denominator (знаменатель)
+                            append_elem.append("{0}".format(re.sub(" +", " ", 
                                    elem.find("div", class_="label label-info").text)))
                             tmp[len(tmp)-1].append(append_elem)
                         else:

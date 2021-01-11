@@ -6,6 +6,6 @@
 
 [ ] - Fix multiple changes parsing
 
-[ ] - Improve showing of lesson with week num 
+[X] - Improve showing of lesson with week num 
 
-[ ] - Fix showing shedule for the week
+[X] - Fix showing shedule for the week
