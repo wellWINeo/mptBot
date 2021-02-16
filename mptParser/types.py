@@ -1,18 +1,17 @@
-import collections
-#
+# types for mptParser
 
-class lesson():
-    
-    __slots__ = "num", "name", "teacher"
+class Lesson():
+    __slots__ = "num", "name", "teacher", "is_dynamic"
 
-    def __init__(self, num: int, name: str, teacher: str):
+    def __init__(self, num: int, name: list,
+                 teacher: list, is_dynamic: bool):
         self.num = num
         self.name = name
         self.teacher = teacher
+        self.is_dynamic = is_dynamic
 
 
-class change():
-   
+class Change():
     __slots__ = "num", "replace_from", "replace_to", "time"
 
     def __init__(self, num: int, _from: str, to: str, time: str):
@@ -23,10 +22,10 @@ class change():
 
 
 class Day(list):
-    def __add__(self, instance: lesson):
+    def __add__(self, instance: Lesson):
         return Day(list.__add__(self, instance))
 
 
-class Changes(list):
-    def __add__(self, instance: change):
-        return Changes(list.__add__(self, instance))
+class ChangesList(list):
+    def __add__(self, instance: Change):
+        return ChangesList(list.__add__(self, instance))

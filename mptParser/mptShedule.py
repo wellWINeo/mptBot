@@ -1,10 +1,10 @@
 import bs4
 import logging
 from mptParser import updater
+from mptParser import types
 import requests
 import re
 from threading import Thread, RLock
-
 
 class mptPage:
     """
@@ -199,7 +199,7 @@ class mptPage:
 
 
 
-    def getSheduleByDay(self, group, targetDay) -> list: 
+    def getSheduleByDay(self, group, target_day) -> list:
         """
         Method to get the shedule for day by group 
         ---------------------- 
@@ -213,7 +213,7 @@ class mptPage:
         
         bodies = tmp = list()
 
-        dayNum = 0
+        day_num = 0
         #bodies = []
 
         try:
@@ -221,36 +221,48 @@ class mptPage:
         except:
             logging.error("[Error] in calling __naviToGroup")
 
-
         for i in range(0, len(bodies) - 1):
         
-            if dayNum == targetDay:
+            if day_num == target_day:
         
                 while True:
                     lesson = bodies[i].find_all("td")
+                    #print(lesson)
                     tmp.append([])
-        
-                    for elem in lesson:
-                        
-                        if len(elem) == 1:
-                            append_elem = [re.sub(" +", " ", elem.text)]
-                            tmp[len(tmp)-1].append(append_elem)
-                        elif len(elem) > 1:
-                            append_elem = []
-                            
-                            # numerator (числитель)
-                            append_elem.append("{0}".format(re.sub(" +", " ", 
-                                   elem.find("div", class_="label label-danger").text)))
 
-                            # denominator (знаменатель)
-                            append_elem.append("{0}".format(re.sub(" +", " ", 
-                                   elem.find("div", class_="label label-info").text)))
-                            tmp[len(tmp)-1].append(append_elem)
-                        else:
-                            tmp[len(tmp)-1].append(" - ")
-                    
+                    # if len(lesson) >= 3:
+                    #     self.__parse_lesson(lesson)
+
+                    # i += 1
+
+                    # if i >= len(bodies) or self.__checkTHead(bodies[i]):
+                    #     tmp.pop(0)
+                    #     return tmp
+
+                    self.__parse_lesson(lesson)
+                    # for elem in lesson:
+
+                    #     print (f"Elems: {elem}")
+                    #     if len(elem) == 1:
+                    #         append_elem = [re.sub(" +", " ", elem.text)]
+                    #         tmp[len(tmp)-1].append(append_elem)
+
+                    #     elif len(elem) > 1:
+                    #         append_elem = []
+
+                    #         # numerator (числитель)
+                    #         append_elem.append("{0}".format(re.sub(" +", " ",
+                    #                elem.find("div", class_="label label-danger").text)))
+
+                    #         # denominator (знаменатель)
+                    #         append_elem.append("{0}".format(re.sub(" +", " ",
+                    #                elem.find("div", class_="label label-info").text)))
+                    #         tmp[len(tmp)-1].append(append_elem)
+                    #     else:
+                    #         tmp[len(tmp)-1].append(" - ")
+
                     i+= 1
-        
+
                     if i >= len(bodies) or self.__checkTHead(bodies[i]):
                         tmp.pop(0)
                         return tmp
@@ -258,7 +270,37 @@ class mptPage:
             else:
         
                 if self.__checkTHead(bodies[i]):
-                    dayNum+= 1
+                    day_num += 1
+
+    def __parse_lesson(self, arr):
+        dynamic = False
+        num = None
+        name = []
+        teach = []
+
+        if len(arr) >= 3:
+            num = re.sub(" +", " ", arr[0].text)
+            if len(arr[1]) > 1:
+                dynamic = True
+
+                # numerator (числитель)
+                name.append("{0}".format(re.sub(" +", " ",
+                        arr[1].find("div", class_="label label-danger").text)))
+
+                teach.append("{0}".format(re.sub(" +", " ",
+                        arr[2].find("div", class_="label label-danger").text)))
+
+                # denominator (знаменатель)
+                name.append("{0}".format(re.sub(" +", " ",
+                        arr[1].find("div", class_="label label-info").text)))
+                teach.append("{0}".format(re.sub(" +", " ",
+                        arr[2].find("div", class_="label label-info").text)))
+
+            else:
+                name = re.sub(" +", " ", arr[1].text)
+                teach = re.sub(" +", " ", arr[2].text)
+
+        return types.Lesson(num, name, teach, dynamic)
 
 
     def getHeader(self, group, day) -> str:
