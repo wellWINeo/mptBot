@@ -7,7 +7,10 @@ TARGETPATH ?= ""
 
 setup:
 	pip3 install --user -r requirements.txt
-	touch logs/sys_logs.txt err out 
+	mkdir -p logs
+	touch logs/logs 
+	touch logs/err 
+	touch logs/out 
 	chmod +x scripts/deploy.sh main.py
 
 clean_logs:

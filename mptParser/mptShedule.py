@@ -160,7 +160,9 @@ class mptPage:
         finally:
             self.lock.release()
 
-    
+    def getChanges(self, group):
+        return self.getChangesByDay(group)
+
     def getChangesByDay(self, group) -> list:
         """
         Method to get today changes

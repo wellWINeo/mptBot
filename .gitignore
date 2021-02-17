@@ -6,9 +6,8 @@
 __pycache__
 
 # Logs ingore
-sys_logs.txt
-err
-out
+logs
+logs/*
 
 # Ignore symlink for tests in bot folder
 bot/config.py
