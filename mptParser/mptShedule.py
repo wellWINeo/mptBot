@@ -137,13 +137,13 @@ class mptPage:
         self.lock.acquire()
         divs = self.pageChanges.find_all("div", {"class" : "table-responsive"})
         self.lock.release()
+        resp = []
 
         for div in divs:
             if div.caption.b.text == group:
-                    return div
-            else:
-                pass
-        return None
+                    #return div
+                    resp.append(div)
+        return resp
 
     def __checkTHead(self, point) -> bool:
         """
@@ -177,24 +177,28 @@ class mptPage:
         """
         
         try:
-            tmp = self.__naviToGroupChanges(group)
+            changes = self.__naviToGroupChanges(group)
         except:
             logging.error("Exception in __naviToGroup")
 
-        if tmp == None:
-            return [] 
-        
-        tmp = tmp.find_all("tr") 
-        
+        if len(changes) == 0:
+            return []
+
         response = []
-         
-        for elem in tmp:
-            response.append([
-                elem.find(class_ = "lesson-number").text,
-                elem.find(class_ = "replace-from").text,
-                elem.find(class_ = "replace-to").text,
-                elem.find(class_ = "updated-at").text
-            ])
+
+        for ch in changes:
+            ch = ch.find_all("tr") 
+            
+            response = []
+             
+            for elem in ch:
+                response.append(types.Change(
+                                            elem.find(class_="lesson-number").text,
+                                            elem.find(class_="replace-from").text,
+                                            elem.find(class_="replace-to").text,
+                                            elem.find(class_="updated-at").text
+
+                    ))
         return response[1:]
 
 
@@ -235,6 +239,7 @@ class mptPage:
             else:
                 if self.__checkTHead(bodies[i]):
                     day_num += 1
+
 
     def __parse_lesson(self, arr):
         dynamic = False
