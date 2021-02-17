@@ -211,10 +211,9 @@ class mptPage:
             matrix like this -> [[num1, name1, teacher1], [num2, name2, teacher2] ...]
         """
         
-        bodies = tmp = list()
+        bodies = resp = list()
 
         day_num = 0
-        #bodies = []
 
         try:
             bodies = self.__naviToGroup(group).find_all("tr")
@@ -225,50 +224,15 @@ class mptPage:
         
             if day_num == target_day:
         
-                while True:
+                while True: 
                     lesson = bodies[i].find_all("td")
-                    #print(lesson)
-                    tmp.append([])
-
-                    # if len(lesson) >= 3:
-                    #     self.__parse_lesson(lesson)
-
-                    # i += 1
-
-                    # if i >= len(bodies) or self.__checkTHead(bodies[i]):
-                    #     tmp.pop(0)
-                    #     return tmp
-
-                    self.__parse_lesson(lesson)
-                    # for elem in lesson:
-
-                    #     print (f"Elems: {elem}")
-                    #     if len(elem) == 1:
-                    #         append_elem = [re.sub(" +", " ", elem.text)]
-                    #         tmp[len(tmp)-1].append(append_elem)
-
-                    #     elif len(elem) > 1:
-                    #         append_elem = []
-
-                    #         # numerator (числитель)
-                    #         append_elem.append("{0}".format(re.sub(" +", " ",
-                    #                elem.find("div", class_="label label-danger").text)))
-
-                    #         # denominator (знаменатель)
-                    #         append_elem.append("{0}".format(re.sub(" +", " ",
-                    #                elem.find("div", class_="label label-info").text)))
-                    #         tmp[len(tmp)-1].append(append_elem)
-                    #     else:
-                    #         tmp[len(tmp)-1].append(" - ")
-
+                    test = self.__parse_lesson(lesson)
+                    resp.append(test)
                     i+= 1
-
                     if i >= len(bodies) or self.__checkTHead(bodies[i]):
-                        tmp.pop(0)
-                        return tmp
-        
+                        resp.pop(0)
+                        return resp 
             else:
-        
                 if self.__checkTHead(bodies[i]):
                     day_num += 1
 
