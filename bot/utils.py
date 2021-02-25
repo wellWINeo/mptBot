@@ -50,21 +50,20 @@ def shedule_handler(call):
                 core.tg_bot.answer_callback_query(call.id, "Расписание на завтра")
                 day_num = datetime.datetime.today() + datetime.timedelta(days=1)
             
-            shedule_tree = mpt.getSheduleByDay(cur_user.group, day_num.isoweekday())
+            day_schedule = mpt.getSheduleByDay(cur_user.group, day_num.isoweekday())
             text += f"{mpt.getHeader(cur_user.group, day_num.isoweekday())}\n{day_num.date()} \n"
             text += "------------" + "\n"
 
-            if shedule_tree != None:
-                for i in shedule_tree:
-                    if len(i[1]) == 1:
-                        text += f"[{i[0][0]}] {i[1][0]}, {i[2][0]}\n"
-                    else:
+            if len(day_schedule) != 0:
+                for i in day_schedule:
+                    if i.is_dynamic:
                         # output format:
                         #               [num] lesson-name, teacher (Ч) \n
                         #                     lesson-name, teacher (З) \n
-                        text += f"[{i[0][0]}] {i[1][0]}, {i[2][0]} (Ч)\n"
-                        text += f"{i[1][1]} {i[2][1]} (З)\n"
-
+                        text += f"[{i.num}] {i.name[0]}, {i.teacher[0]} (Ч)\n"
+                        text += f"{i.name[1]}, {i.teacher[1]} (З)\n"
+                    else:
+                        text += f"[{i.num}] {i.name}, {i.teacher}\n"
             else:
                 text += "Предметов не найдено!"
             core.tg_bot.send_message(call.message.chat.id, text=text)
@@ -74,26 +73,23 @@ def shedule_handler(call):
             core.tg_bot.send_message(call.message.chat.id, "Номер недели - " \
                                                         f"{mpt.getWeekCount()}")
             for d in range(1, 7):
-                shedule_tree = mpt.getSheduleByDay(cur_user.group, d)
+                day_schedule = mpt.getSheduleByDay(cur_user.group, d)
 
-                if shedule_tree != None:
+                if len(day_schedule) != 0:
                     text = f"{mpt.getHeader(cur_user.group, d)}\n"
                     text += f"---------------\n"
-                    
-                    for i in shedule_tree:
-                        if len(i[1]) == 1:
-                            text += f"[{i[0][0]}] {i[1][0]}, {i[2][0]}\n"
-                        else:
+
+
+                    for i in day_schedule:
+                        if i.is_dynamic:
                             # output format:
                             #               [num] lesson-name, teacher (Ч) \n
                             #                     lesson-name, teacher (З) \n
-                            text += f"[{i[0][0]}] {i[1][0]}, {i[2][0]} (Ч)\n"
-                            text += f"{i[1][1]} {i[2][1]} (З)\n"
-                        # if len(i[1]) == 1:
-                        #     text += f"[{i[0][0]}] {i[1][0]}, {i[2][0]}\n"
-                        # else:
-                        #     text += f"[{i[0][0]}] {i[1][0]}/{i[1][1]}, {i[2][0]}/" \
-                        #             f"{i[2][1]}\n"
+                            text += f"[{i.num}] {i.name[0]}, {i.teacher[0]} (Ч)\n"
+                            text += f"{i.name[1]}, {i.teacher[1]} (З)"
+                        else:
+                            text += f"[{i.name}] {i.name}, {i.teacher}"
+
 
                 else:
                     text += "Предметы не найдены!"
@@ -120,16 +116,16 @@ def changes_handler(msg):
     text = ""
     
     if cur_user != None:
-        changes_tree = mpt.getChangesByDay(cur_user.group)
+        day_changes = mpt.getChangesByDay(cur_user.group)
         
-        if len(changes_tree) != 0:
+        if len(day_changes) != 0:
             text += f"Группа: {cur_user.group}\n"
 
-            for lesson in changes_tree:
-                text += f"[{lesson[0]}]\n"
-                text += f"  Заменяется: {lesson[1]}\n"
-                text += f"  На что: {lesson[2]}\n"
-                text += f"  Добавлено: {lesson[3]}\n"
+            for ch in day_changes:
+                text += f"[{ch.num}]\n"
+                text += f"  Заменяется: {ch.replace_from}\n"
+                text += f"  На что: {ch.replace_to}\n"
+                text += f"  Добавлено: {ch.time}\n"
                 text += "---\n"
         else:
             text += f"На сегодня замен для групы {cur_user.group} не найдено!"

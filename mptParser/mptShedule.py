@@ -1,10 +1,10 @@
 import bs4
 import logging
 from mptParser import updater
+from mptParser import types
 import requests
 import re
 from threading import Thread, RLock
-
 
 class mptPage:
     """
@@ -137,13 +137,13 @@ class mptPage:
         self.lock.acquire()
         divs = self.pageChanges.find_all("div", {"class" : "table-responsive"})
         self.lock.release()
+        resp = []
 
         for div in divs:
             if div.caption.b.text == group:
-                    return div
-            else:
-                pass
-        return None
+                    #return div
+                    resp.append(div)
+        return resp
 
     def __checkTHead(self, point) -> bool:
         """
@@ -160,7 +160,9 @@ class mptPage:
         finally:
             self.lock.release()
 
-    
+    def getChanges(self, group):
+        return self.getChangesByDay(group)
+
     def getChangesByDay(self, group) -> list:
         """
         Method to get today changes
@@ -177,29 +179,33 @@ class mptPage:
         """
         
         try:
-            tmp = self.__naviToGroupChanges(group)
+            changes = self.__naviToGroupChanges(group)
         except:
             logging.error("Exception in __naviToGroup")
 
-        if tmp == None:
-            return [] 
-        
-        tmp = tmp.find_all("tr") 
-        
+        if len(changes) == 0:
+            return []
+
         response = []
-         
-        for elem in tmp:
-            response.append([
-                elem.find(class_ = "lesson-number").text,
-                elem.find(class_ = "replace-from").text,
-                elem.find(class_ = "replace-to").text,
-                elem.find(class_ = "updated-at").text
-            ])
+
+        for ch in changes:
+            ch = ch.find_all("tr") 
+            
+            response = []
+             
+            for elem in ch:
+                response.append(types.Change(
+                                            elem.find(class_="lesson-number").text,
+                                            elem.find(class_="replace-from").text,
+                                            elem.find(class_="replace-to").text,
+                                            elem.find(class_="updated-at").text
+
+                    ))
         return response[1:]
 
 
 
-    def getSheduleByDay(self, group, targetDay) -> list: 
+    def getSheduleByDay(self, group, target_day) -> list:
         """
         Method to get the shedule for day by group 
         ---------------------- 
@@ -211,54 +217,61 @@ class mptPage:
             matrix like this -> [[num1, name1, teacher1], [num2, name2, teacher2] ...]
         """
         
-        bodies = tmp = list()
+        bodies = resp = list()
 
-        dayNum = 0
-        #bodies = []
+        day_num = 0
 
         try:
             bodies = self.__naviToGroup(group).find_all("tr")
         except:
             logging.error("[Error] in calling __naviToGroup")
 
-
         for i in range(0, len(bodies) - 1):
         
-            if dayNum == targetDay:
+            if day_num == target_day:
         
-                while True:
+                while True: 
                     lesson = bodies[i].find_all("td")
-                    tmp.append([])
-        
-                    for elem in lesson:
-                        
-                        if len(elem) == 1:
-                            append_elem = [re.sub(" +", " ", elem.text)]
-                            tmp[len(tmp)-1].append(append_elem)
-                        elif len(elem) > 1:
-                            append_elem = []
-                            
-                            # numerator (числитель)
-                            append_elem.append("{0}".format(re.sub(" +", " ", 
-                                   elem.find("div", class_="label label-danger").text)))
-
-                            # denominator (знаменатель)
-                            append_elem.append("{0}".format(re.sub(" +", " ", 
-                                   elem.find("div", class_="label label-info").text)))
-                            tmp[len(tmp)-1].append(append_elem)
-                        else:
-                            tmp[len(tmp)-1].append(" - ")
-                    
+                    test = self.__parse_lesson(lesson)
+                    resp.append(test)
                     i+= 1
-        
                     if i >= len(bodies) or self.__checkTHead(bodies[i]):
-                        tmp.pop(0)
-                        return tmp
-        
+                        resp.pop(0)
+                        return resp 
             else:
-        
                 if self.__checkTHead(bodies[i]):
-                    dayNum+= 1
+                    day_num += 1
+
+
+    def __parse_lesson(self, arr):
+        dynamic = False
+        num = None
+        name = []
+        teach = []
+
+        if len(arr) >= 3:
+            num = re.sub(" +", " ", arr[0].text)
+            if len(arr[1]) > 1:
+                dynamic = True
+
+                # numerator (числитель)
+                name.append("{0}".format(re.sub(" +", " ",
+                        arr[1].find("div", class_="label label-danger").text)))
+
+                teach.append("{0}".format(re.sub(" +", " ",
+                        arr[2].find("div", class_="label label-danger").text)))
+
+                # denominator (знаменатель)
+                name.append("{0}".format(re.sub(" +", " ",
+                        arr[1].find("div", class_="label label-info").text)))
+                teach.append("{0}".format(re.sub(" +", " ",
+                        arr[2].find("div", class_="label label-info").text)))
+
+            else:
+                name = re.sub(" +", " ", arr[1].text)
+                teach = re.sub(" +", " ", arr[2].text)
+
+        return types.Lesson(num, name, teach, dynamic)
 
 
     def getHeader(self, group, day) -> str:
