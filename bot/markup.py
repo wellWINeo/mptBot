@@ -1,9 +1,10 @@
 from telebot import types
 
+
 def item_chooser_keyboard(mpt, items):
     # groups = mpt.get_groups_by_dir(direction)
     markup = types.ReplyKeyboardMarkup(row_width=3)
-    
+ 
     for i in range(0, len(items) - len(items) % 3, 3):
         markup.row(
                 types.KeyboardButton(items[i]),
@@ -12,9 +13,8 @@ def item_chooser_keyboard(mpt, items):
     mod = len(items) % 3
 
     if mod == 2:
-        markup.row( 
-            types.KeyboardButton(items[len(items)-2]),
-            types.KeyboardButton(items[len(items)-1]))
+        markup.row(types.KeyboardButton(items[len(items)-2]),
+                   types.KeyboardButton(items[len(items)-1]))
     elif mod == 1:
         markup.row(types.KeyboardButton(items[len(items)-1]))
     

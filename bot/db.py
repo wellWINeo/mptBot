@@ -1,6 +1,7 @@
 from enum import Enum, auto
 from tinydb import Query, TinyDB
 
+
 class status(Enum):
     UNKNOWN = auto()
     NO_GROUP = auto()
@@ -32,7 +33,7 @@ class users_db:
     def add_user(self, instance):
         self.db.insert({
             "user_id": instance.user_id,
-            "name" : instance.name,
+            "name": instance.name,
             "group": instance.group,
             "last_chat_id": instance.last_chat_id,
             "status": instance.status})
@@ -47,4 +48,3 @@ class users_db:
                         "last_chat_id": instance.last_chat_id,
                         "status": instance.status},
                         self.query.user_id == instance.user_id)
-

@@ -7,36 +7,37 @@ import mptParser.mptShedule
 import telebot
 import time
 
-#----------
+# ----------
 # Init some vars
-#----------
+# ----------
 mpt = mptParser.mptShedule.mptPage()
 
 
-#----------
+# ----------
 # Main funcs
 # for message
 # answering
-#----------
+# ----------
 
 def wait_group_choose(msg, groups):
     core.tg_bot.send_message(msg.chat.id, "Выберите группу: ",
                             reply_markup=markup.item_chooser_keyboard(mpt, groups))
 
+
 def group_choosed(msg):
     core.tg_bot.send_message(msg.chat.id, "Отлично! Группа выбрана и сохранена",
                             reply_markup=telebot.types.ReplyKeyboardRemove())
 
+
 def shedule_date(msg):
     logging.debug("Shedule handling date")
-    core.tg_bot.send_message(msg.chat.id, "Выберите на какой срок: ", 
+    core.tg_bot.send_message(msg.chat.id, "Выберите на какой срок: ",
                             reply_markup=markup.choose_shedule_date())
+
 
 def shedule_handler(call):
     logging.debug("Shedule end handler")
-
     cur_user = core.db.get_user(call.from_user.id)
-    
     week_num = mpt.getWeekCount()
     text = f"{week_num}: "
    
@@ -70,8 +71,8 @@ def shedule_handler(call):
 
         else:
             core.tg_bot.answer_callback_query(call.id, "Расписание на неделю")
-            core.tg_bot.send_message(call.message.chat.id, "Номер недели - " \
-                                                        f"{mpt.getWeekCount()}")
+            core.tg_bot.send_message(call.message.chat.id, "Номер недели - "\
+                                    f"{mpt.getWeekCount()}")
             for d in range(1, 7):
                 day_schedule = mpt.getSheduleByDay(cur_user.group, d)
 
@@ -89,7 +90,6 @@ def shedule_handler(call):
                             text += f"{i.name[1]}, {i.teacher[1]} (З)"
                         else:
                             text += f"[{i.name}] {i.name}, {i.teacher}"
-
 
                 else:
                     text += "Предметы не найдены!"
