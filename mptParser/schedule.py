@@ -6,6 +6,7 @@ import requests
 import re
 from threading import Thread, RLock
 
+
 class mptPage:
     """
     Class for parsing data from mpt.ru
@@ -17,12 +18,12 @@ class mptPage:
 
     ----------------------
     Methods
-    
+ 
     getWeekCount(None)
         Return is week odd
     
     getShedyleByDay(group, targetDay)
-        Return matrix with shedule of the group by this day
+        Return matrix with schedule of the group by this day
 
     getHeader(group, day)
         Return name of week's day
@@ -30,7 +31,7 @@ class mptPage:
     pageShedule: str
     pageChanges: str
     lock = RLock() 
-    
+ 
     def __init__(self):
         """
         Constructor for mptPage class
@@ -41,27 +42,22 @@ class mptPage:
         """ 
         self.updateDaemon = updater.updaterThread(self, self.lock)
         self.updateDaemon.setDaemon(True)
-        
         self.update()
-        
         self.updateDaemon.start()
 
 
     def update(self):
-        try:
-            self.pageShedule = requests.get("https://mpt.ru/studentu/raspisanie-zanyatiy/") 
-            self.pageChanges = requests.get("https://mpt.ru/studentu/izmeneniya-v-raspisanii")
+        # Get
+        self.pageShedule = requests.get("https://mpt.ru/studentu/raspisanie-zanyatiy/") 
+        self.pageChanges = requests.get("https://mpt.ru/studentu/izmeneniya-v-raspisanii")
 
-            self.pageShedule = bs4.BeautifulSoup(self.pageShedule.text, "html.parser")   
-            self.pageChanges = bs4.BeautifulSoup(self.pageChanges.text, "html.parser").body.main
-
-        except:
-            logging.error("Connection refused")
-            exit
+        # Parse
+        self.pageShedule = bs4.BeautifulSoup(self.pageShedule.text, "html.parser")   
+        self.pageChanges = bs4.BeautifulSoup(self.pageChanges.text, "html.parser").body.main
 
 
 
-    def getWeekCount(self) -> str:
+    def get_week_count(self) -> types.WeekNum:
         """Returns count of current week (числитель/знаменатель) """
         try:
             self.lock.acquire()
@@ -69,17 +65,17 @@ class mptPage:
             self.lock.release()
             
             if response != None:
-                return response.text
+                return types.WeekNum.Chisl
             else:
                 response = self.pageShedule.find("span", class_="label label-info")
                 if response != None:
-                    return response.text
+                    return types.WeekNum.Znam 
                 else:
-                    return "¯\\_(ツ)_/¯"
+                    return types.WeekNum.NotFound
 
         except AttributeError:
             logging.error("Attribute erro in getWeekCount()")
-            return "¯\\_(ツ)_/¯"
+            return types.WeekNum.NotFound
 
     def __tab_num(self, target: str, headers: list):
         for num in range(0, len(headers)):
@@ -96,7 +92,7 @@ class mptPage:
     def get_groups_by_dir(self, direction: str):
         
         self.lock.acquire()
-        tabs = self.pageShedule.find_all("ul", {"class" : "nav nav-tabs"})
+        tabs = self.pageShedule.find_all("ul", {"class": "nav nav-tabs"})
         self.lock.release()
         num = self.__tab_num(direction, tabs[0].find_all("li"))
         tabs = tabs[1::]
@@ -115,11 +111,11 @@ class mptPage:
             response.append(tmp)
         return response
 
-    def __naviToGroup(self, group: str):
-        """Privete method for navigation in soup to group (for shedule)"""
+    def __navi_to_group(self, group: str):
+        """Privete method for navigation in soup to group (for schedule)"""
         
         self.lock.acquire()
-        divs = self.pageShedule.body.main.find_all("div", {"class" : "tab-pane"})
+        divs = self.pageShedule.body.main.find_all("div", {"class": "tab-pane"})
         self.lock.release()
 
         group = "Группа " + group
@@ -128,20 +124,19 @@ class mptPage:
                 if div.find("h3").text == group:
                     return div
             except:
-                logging.error("AttributeError in _naviToGroup(), comparison")
+                logging.error("AttributeError in __navi_to_group(), comparison")
         return None
 
 
-    def __naviToGroupChanges(self, group: str):
+    def __navi_to_group_changes(self, group: str):
         """Private method for navigation in soup to group (for changes)"""
         self.lock.acquire()
-        divs = self.pageChanges.find_all("div", {"class" : "table-responsive"})
+        divs = self.pageChanges.find_all("div", {"class": "table-responsive"})
         self.lock.release()
         resp = []
 
         for div in divs:
             if div.caption.b.text == group:
-                    #return div
                     resp.append(div)
         return resp
 
@@ -160,10 +155,10 @@ class mptPage:
         finally:
             self.lock.release()
 
-    def getChanges(self, group):
-        return self.getChangesByDay(group)
+    def get_changes(self, group):
+        return self.get_changes_by_day(group)
 
-    def getChangesByDay(self, group) -> list:
+    def get_changes_by_day(self, group) -> list:
         """
         Method to get today changes
         ---------------------------
@@ -172,16 +167,15 @@ class mptPage:
         
         ---------------------------
         Returns:
-            matrix like this -> [
-                                 [lesson_num1, replace-from1, replace-to1, updated-at1],
-                                 [lesson_num2, replace-from2, replace-to2, updated-at2],
-                                 ...]
+            Array of types.Change class instances 
         """
         
+        changes = []
+
         try:
-            changes = self.__naviToGroupChanges(group)
+            changes = self.__navi_to_group_changes(group)
         except:
-            logging.error("Exception in __naviToGroup")
+            logging.error("Exception in __navi_to_group")
 
         if len(changes) == 0:
             return []
@@ -204,10 +198,9 @@ class mptPage:
         return response[1:]
 
 
-
-    def getSheduleByDay(self, group, target_day) -> list:
+    def get_schedule_by_day(self, group, target_day) -> list:
         """
-        Method to get the shedule for day by group 
+        Method to get the schedule for day by group 
         ---------------------- 
         Params:     
             -- $day = string with correct name of group, like it typed on the site 
@@ -218,13 +211,12 @@ class mptPage:
         """
         
         bodies = resp = list()
-
         day_num = 0
 
         try:
-            bodies = self.__naviToGroup(group).find_all("tr")
+            bodies = self.__navi_to_group(group).find_all("tr")
         except:
-            logging.error("[Error] in calling __naviToGroup")
+            logging.error("[Error] in calling __navi_to_group")
 
         for i in range(0, len(bodies) - 1):
         
@@ -234,7 +226,7 @@ class mptPage:
                     lesson = bodies[i].find_all("td")
                     test = self.__parse_lesson(lesson)
                     resp.append(test)
-                    i+= 1
+                    i += 1
                     if i >= len(bodies) or self.__checkTHead(bodies[i]):
                         resp.pop(0)
                         return resp 
@@ -274,7 +266,7 @@ class mptPage:
         return types.Lesson(num, name, teach, dynamic)
 
 
-    def getHeader(self, group, day) -> str:
+    def get_header(self, group, day) -> str:
         """
         Returns string with day of the week name
         ----------------------
@@ -285,7 +277,7 @@ class mptPage:
         
         # TODO: Make error raising
         try:
-            return self.__naviToGroup(group).find_all("thead")[day-1].h4.text
+            return self.__navi_to_group(group).find_all("thead")[day-1].h4.text
         except: 
             return ""
 

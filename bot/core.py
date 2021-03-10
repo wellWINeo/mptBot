@@ -1,15 +1,15 @@
 import telebot
 import time
 import config
-from mptParser.mptShedule import mptPage
+from mptParser.schedule import mptPage
 import logging
 
-#hack to fix circular deps
+# hack to fix circular deps
 tg_bot = telebot.AsyncTeleBot(config.bot_token)
 
 import bot.markup as bot_markup
 import bot.user as users
-import bot.utils as utils 
+import bot.utils as utils
 
 db = users.users_db(config.db_path)
 
@@ -18,12 +18,12 @@ db = users.users_db(config.db_path)
 #----------------
 commands_tree = {
         "START": ("start", "/start"),
-        "SHEDULE": ("shedule", "/shedule", "расписание", "/расписание", "Расписание"),
+        "SHEDULE": ("schedule", "/schedule", "расписание", "/расписание", "Расписание"),
         "CHANGES": ("changes", "/changes", "замены", "/замены", "Замены"),
         "HELP": ("help", "/help", "помощь", "/помощь", "Помощь"),
         "PING": ("ping", "/ping", "Ping", "пинг", "Пинг"),
         "DEL": ("/del", "del", "delete", "/delete"),
-        "ABOUT" : ("/about", "about", "About"),
+        "ABOUT": ("/about", "about", "About"),
         "ME": ("/me", "/Me", "me", "Me")}
 
 
@@ -35,12 +35,12 @@ commands_tree = {
                         else False)
 def start_handler(message):
     logging.debug("[" + str(message.from_user.id) + "] " + "Bot received \"start\" command")
-    tg_bot.reply_to(message, "Привет, бот запущен!\nЕго цель - удобный просмотр " \
-                             "расписания МПТ, а также он предупреждает о заменах.\n " \
+    tg_bot.reply_to(message, "Привет, бот запущен!\nЕго цель - удобный просмотр "\
+                             "расписания МПТ, а также он предупреждает о заменах.\n "\
                              "Для того чтобы узнать о комманда введите:\n " \
                              "/help")
     logging.debug("[" + str(message.from_user.id) + "] " + "Initial answer on \"start\" command sent")
-    if db.get_user(message.from_user.id) == None:
+    if db.get_user(message.from_user.id) is None:
         logging.debug("[" + str(message.from_user.id) + "] " + "User not present in db")
         tg_bot.send_message(message.chat.id, "Выберите направление: ",
             reply_markup=bot_markup.direction_choose_keyboard())
@@ -49,11 +49,12 @@ def start_handler(message):
         new_user = users.user(message.from_user.id, message.from_user.first_name)
         db.add_user(new_user)
 
+
 #----------------
 # Receiving anwer about
 # user's group direction
 #----------------
-@tg_bot.message_handler(func= lambda message: 
+@tg_bot.message_handler(func=lambda message: 
                         True if db.get_user(message.from_user.id) != None and 
                         db.get_user(message.from_user.id).status < users.status.ANON
                         else False)
@@ -63,9 +64,7 @@ def answer_message_handler(message):
 
     if user != None:
         if user.status == users.status.UNKNOWN:
-
             groups = utils.mpt.get_groups_by_dir(message.text)
-            
             if len(groups) == 0:
                 logging.debug(f"[{user.user_id}] Invalid dir")
                 tg_bot.send_message(message.chat.id, "Неккоректный ответ, " \
@@ -102,12 +101,12 @@ def answer_message_handler(message):
                         True if message.text in commands_tree["HELP"]
                         else False)
 def help_handler(message):
-    logging.debug("[" + str(message.from_user.id) + "]" +"help command")
-    tg_bot.send_message(message.chat.id, "Здесь представлены основные команды бота: \n" \
+    logging.debug(f"[{message.from_user.id})] help command")
+    tg_bot.send_message(message.chat.id, "Здесь представлены основные команды бота: \n"\
                                          "\t/start - запускает бота и регистрирует " \
-                                         "пользователя если он еще не зарегистрирован\n" \
-                                         "\t/расписание - отправляет сообщение с меню" \
-                                         "выбора дня для показа расписания\n" \
+                                         "пользователя если он еще не зарегистрирован\n"\
+                                         "\t/расписание - отправляет сообщение с меню"\
+                                         "выбора дня для показа расписания\n"\
                                          "\t/замены - отправляет список замен (если есть)" \
                                          "на текущий день\n"
                                          "\t/ping - просто проверка, что бот еще жив\n" \
@@ -162,7 +161,6 @@ def about_handler(message):
                                          "Чтобы увидеть список команд: /help")
 
 
-
 #----------------
 # Send info
 # about user
@@ -184,13 +182,13 @@ def me_handler(message):
 
 #----------------
 # Sending callback
-# for shedule day
+# for schedule day
 # choosing
 #----------------
 @tg_bot.message_handler(func=lambda message:
                         True if message.text.split()[0] in commands_tree["SHEDULE"]
                         else False)
-def shedule_handler(message):
+def schedule_handler(message):
     logging.debug("[{message.from_user.id}] Shedule command")
     cur_user = db.get_user(message.from_user.id)
     if len(message.text.split()) > 1:
@@ -204,7 +202,7 @@ def shedule_handler(message):
             cur_user.group = " ".join(message.text.split()[1:])
             cur_user.status = users.status.ANOTHER
             db.update(cur_user)
-    utils.shedule_date(message)
+    utils.schedule_date(message)
 
 
 #----------------
@@ -216,7 +214,7 @@ def shedule_handler(message):
                                else False)
 def callback_query(call):
     logging.debug("[" + str(call.message.from_user.id) + "] " + "Callback query received")
-    utils.shedule_handler(call)
+    utils.schedule_handler(call)
 
 
 #----------------

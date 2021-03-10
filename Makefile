@@ -13,7 +13,7 @@ setup:
 	touch logs/out 
 	chmod +x scripts/deploy.sh main.py
 
-clean_logs:
+clean:
 	rm out err logs/sys_logs.txt
 
 restore_logs: clean_logs
