@@ -98,9 +98,9 @@ def schedule_handler(call):
                             #               [num] lesson-name, teacher (Ч) \n
                             #                     lesson-name, teacher (З) \n
                             text += f"[{i.num}] {i.name[0]}, {i.teacher[0]} (Ч)\n"
-                            text += f"{i.name[1]}, {i.teacher[1]} (З)"
+                            text += f"{i.name[1]}, {i.teacher[1]} (З)\n"
                         else:
-                            text += f"[{i.name}] {i.name}, {i.teacher}"
+                            text += f"[{i.num}] {i.name}, {i.teacher}\n"
 
                 else:
                     text += "Предметы не найдены!"

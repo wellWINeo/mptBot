@@ -124,7 +124,7 @@ class mptPage:
                 if div.find("h3").text == group:
                     return div
             except:
-                logging.error("AttributeError in _naviToGroup(), comparison")
+                logging.error("AttributeError in __navi_to_group(), comparison")
         return None
 
 
@@ -175,7 +175,7 @@ class mptPage:
         try:
             changes = self.__navi_to_group_changes(group)
         except:
-            logging.error("Exception in __naviToGroup")
+            logging.error("Exception in __navi_to_group")
 
         if len(changes) == 0:
             return []
@@ -216,7 +216,7 @@ class mptPage:
         try:
             bodies = self.__navi_to_group(group).find_all("tr")
         except:
-            logging.error("[Error] in calling __naviToGroup")
+            logging.error("[Error] in calling __navi_to_group")
 
         for i in range(0, len(bodies) - 1):
         
@@ -277,7 +277,7 @@ class mptPage:
         
         # TODO: Make error raising
         try:
-            return self.__naviToGroup(group).find_all("thead")[day-1].h4.text
+            return self.__navi_to_group(group).find_all("thead")[day-1].h4.text
         except: 
             return ""
 
