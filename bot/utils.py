@@ -4,6 +4,7 @@ import bot.user as users
 import datetime
 import logging
 import mptParser.schedule
+import mptParser.types as types
 import telebot
 import time
 
@@ -18,6 +19,11 @@ mpt = mptParser.schedule.mptPage()
 # for message
 # answering
 # ----------
+
+def week_odd_handler(week_num: mptParser.types.WeekNum) -> str:
+    if week_num == types.WeekNum.NotFound: return "Неизвестно"
+    elif week_num == types.WeekNum.Znam: return "Знаменатель"
+    elif week_num == types.WeekNum.Chisl: return "Числитель" 
 
 def wait_group_choose(msg, groups):
     core.tg_bot.send_message(msg.chat.id, "Выберите группу: ",
@@ -38,8 +44,7 @@ def schedule_date(msg):
 def schedule_handler(call):
     logging.debug("Schedule end handler")
     cur_user = core.db.get_user(call.from_user.id)
-    week_num = mpt.get_week_count()
-    text = f"{week_num}: "
+    text = f"{week_odd_handler(mpt.get_week_count())}: "
    
     if cur_user != None:
         if call.data != "cb_week":
@@ -47,7 +52,13 @@ def schedule_handler(call):
             if call.data == "cb_today":
                 core.tg_bot.answer_callback_query(call.id, "Расписание на сегодня")
                 day_num = datetime.datetime.today()
+
             elif call.data == "cb_tomorrow":
+                if 0 <= datetime.datetime.now().time().hour <= 4:
+                    core.tg_bot.send_message(call.message.chat.id, 
+                                            "Предупреждение: уже за полночь, возможно "\
+                                            "ты хотел просмотреть расписание на Сегодня?")
+
                 core.tg_bot.answer_callback_query(call.id, "Расписание на завтра")
                 day_num = datetime.datetime.today() + datetime.timedelta(days=1)
             
@@ -72,7 +83,7 @@ def schedule_handler(call):
         else:
             core.tg_bot.answer_callback_query(call.id, "Расписание на неделю")
             core.tg_bot.send_message(call.message.chat.id, "Номер недели - "\
-                                    f"{mpt.get_week_count()}")
+                                    f"{week_odd_handler(mpt.get_week_count())}")
             for d in range(1, 7):
                 day_schedule = mpt.get_schedule_by_day(cur_user.group, d)
 
@@ -128,7 +139,7 @@ def changes_handler(msg):
                 text += f"  Добавлено: {ch.time}\n"
                 text += "---\n"
         else:
-            text += f"На сегодня замен для групы {cur_user.group} не найдено!"
+            text += f"На сегодня замен для группы {cur_user.group} не найдено!"
     else:
         text += "Сперва необходимо выполнить  \"/start\" и выбрать группу"
     
