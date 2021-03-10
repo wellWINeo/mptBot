@@ -1,7 +1,7 @@
 import telebot
 import time
 import config
-from mptParser.mptShedule import mptPage
+from mptParser.schedule import mptPage
 import logging
 
 # hack to fix circular deps
@@ -18,7 +18,7 @@ db = users.users_db(config.db_path)
 #----------------
 commands_tree = {
         "START": ("start", "/start"),
-        "SHEDULE": ("shedule", "/shedule", "расписание", "/расписание", "Расписание"),
+        "SHEDULE": ("schedule", "/schedule", "расписание", "/расписание", "Расписание"),
         "CHANGES": ("changes", "/changes", "замены", "/замены", "Замены"),
         "HELP": ("help", "/help", "помощь", "/помощь", "Помощь"),
         "PING": ("ping", "/ping", "Ping", "пинг", "Пинг"),
@@ -182,13 +182,13 @@ def me_handler(message):
 
 #----------------
 # Sending callback
-# for shedule day
+# for schedule day
 # choosing
 #----------------
 @tg_bot.message_handler(func=lambda message:
                         True if message.text.split()[0] in commands_tree["SHEDULE"]
                         else False)
-def shedule_handler(message):
+def schedule_handler(message):
     logging.debug("[{message.from_user.id}] Shedule command")
     cur_user = db.get_user(message.from_user.id)
     if len(message.text.split()) > 1:
@@ -202,7 +202,7 @@ def shedule_handler(message):
             cur_user.group = " ".join(message.text.split()[1:])
             cur_user.status = users.status.ANOTHER
             db.update(cur_user)
-    utils.shedule_date(message)
+    utils.schedule_date(message)
 
 
 #----------------
@@ -214,7 +214,7 @@ def shedule_handler(message):
                                else False)
 def callback_query(call):
     logging.debug("[" + str(call.message.from_user.id) + "] " + "Callback query received")
-    utils.shedule_handler(call)
+    utils.schedule_handler(call)
 
 
 #----------------

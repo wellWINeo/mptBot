@@ -3,14 +3,14 @@ import bot.markup as markup
 import bot.user as users
 import datetime
 import logging
-import mptParser.mptShedule
+import mptParser.schedule
 import telebot
 import time
 
 # ----------
 # Init some vars
 # ----------
-mpt = mptParser.mptShedule.mptPage()
+mpt = mptParser.schedule.mptPage()
 
 
 # ----------
@@ -29,16 +29,16 @@ def group_choosed(msg):
                             reply_markup=telebot.types.ReplyKeyboardRemove())
 
 
-def shedule_date(msg):
-    logging.debug("Shedule handling date")
+def schedule_date(msg):
+    logging.debug("Schedule handling date")
     core.tg_bot.send_message(msg.chat.id, "Выберите на какой срок: ",
-                            reply_markup=markup.choose_shedule_date())
+                            reply_markup=markup.choose_schedule_date())
 
 
-def shedule_handler(call):
-    logging.debug("Shedule end handler")
+def schedule_handler(call):
+    logging.debug("Schedule end handler")
     cur_user = core.db.get_user(call.from_user.id)
-    week_num = mpt.getWeekCount()
+    week_num = mpt.get_week_count()
     text = f"{week_num}: "
    
     if cur_user != None:
@@ -51,8 +51,8 @@ def shedule_handler(call):
                 core.tg_bot.answer_callback_query(call.id, "Расписание на завтра")
                 day_num = datetime.datetime.today() + datetime.timedelta(days=1)
             
-            day_schedule = mpt.getSheduleByDay(cur_user.group, day_num.isoweekday())
-            text += f"{mpt.getHeader(cur_user.group, day_num.isoweekday())}\n{day_num.date()} \n"
+            day_schedule = mpt.get_schedule_by_day(cur_user.group, day_num.isoweekday())
+            text += f"{mpt.get_header(cur_user.group, day_num.isoweekday())}\n{day_num.date()} \n"
             text += "------------" + "\n"
 
             if len(day_schedule) != 0:
@@ -72,12 +72,12 @@ def shedule_handler(call):
         else:
             core.tg_bot.answer_callback_query(call.id, "Расписание на неделю")
             core.tg_bot.send_message(call.message.chat.id, "Номер недели - "\
-                                    f"{mpt.getWeekCount()}")
+                                    f"{mpt.get_week_count()}")
             for d in range(1, 7):
-                day_schedule = mpt.getSheduleByDay(cur_user.group, d)
+                day_schedule = mpt.get_schedule_by_day(cur_user.group, d)
 
                 if len(day_schedule) != 0:
-                    text = f"{mpt.getHeader(cur_user.group, d)}\n"
+                    text = f"{mpt.get_header(cur_user.group, d)}\n"
                     text += f"---------------\n"
 
 
@@ -116,7 +116,7 @@ def changes_handler(msg):
     text = ""
     
     if cur_user != None:
-        day_changes = mpt.getChangesByDay(cur_user.group)
+        day_changes = mpt.get_changes(cur_user.group)
         
         if len(day_changes) != 0:
             text += f"Группа: {cur_user.group}\n"

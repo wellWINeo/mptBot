@@ -156,7 +156,7 @@ class mptPage:
             self.lock.release()
 
     def get_changes(self, group):
-        return self.getChangesByDay(group)
+        return self.get_changes_by_day(group)
 
     def get_changes_by_day(self, group) -> list:
         """
@@ -170,8 +170,10 @@ class mptPage:
             Array of types.Change class instances 
         """
         
+        changes = []
+
         try:
-            changes = self.__naviToGroupChanges(group)
+            changes = self.__navi_to_group_changes(group)
         except:
             logging.error("Exception in __naviToGroup")
 

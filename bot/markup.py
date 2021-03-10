@@ -23,7 +23,7 @@ def item_chooser_keyboard(mpt, items):
 def group_choose_keyboard(a, b):
     pass
 
-def choose_shedule_date():
+def choose_schedule_date():
     markup = types.InlineKeyboardMarkup(row_width=3)
 
     markup.add(
