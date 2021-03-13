@@ -35,7 +35,7 @@ commands_tree = {
                         else False)
 def start_handler(message):
     logging.debug("[" + str(message.from_user.id) + "] " + "Bot received \"start\" command")
-    tg_bot.reply_to(message, "Привет, бот запущен!\nЕго цель - удобный просмотр "\
+    tg_bot.reply_to(message, "Привет, бот запущен!\nЕго цель — удобный просмотр "\
                              "расписания МПТ, а также он предупреждает о заменах.\n "\
                              "Для того чтобы узнать о комманда введите:\n " \
                              "/help")
@@ -67,7 +67,7 @@ def answer_message_handler(message):
             groups = utils.mpt.get_groups_by_dir(message.text)
             if len(groups) == 0:
                 logging.debug(f"[{user.user_id}] Invalid dir")
-                tg_bot.send_message(message.chat.id, "Неккоректный ответ, " \
+                tg_bot.send_message(message.chat.id, "Некорректный ответ, " \
                                                      "попробуйте еще раз",
                                     reply_markup=bot_markup.direction_choose_keyboard())
             else:
@@ -83,7 +83,7 @@ def answer_message_handler(message):
             
             if message.text not in groups:
                 logging.debug(f"[{user.user_id}] Invalid group")
-                tg_bot.send_message(message.chat.id, "Неккоректный номер группы," \
+                tg_bot.send_message(message.chat.id, "Некорректный номер группы," \
                                                      "выберите, используя клавиатуру")
             else:
                 utils.group_choosed(message)
@@ -103,9 +103,9 @@ def answer_message_handler(message):
 def help_handler(message):
     logging.debug(f"[{message.from_user.id})] help command")
     tg_bot.send_message(message.chat.id, "Здесь представлены основные команды бота: \n"\
-                                         "\t/start - запускает бота и регистрирует " \
-                                         "пользователя если он еще не зарегистрирован\n"\
-                                         "\t/расписание - отправляет сообщение с меню"\
+                                         "\t/start — запускает бота и регистрирует " \
+                                         "пользователя, если он еще не зарегистрирован\n"\
+                                         "\t/расписание - отправляет сообщение с меню "\
                                          "выбора дня для показа расписания\n"\
                                          "\t/замены - отправляет список замен (если есть)" \
                                          "на текущий день\n"
@@ -114,7 +114,7 @@ def help_handler(message):
                                          "\t/about - увидеть доп. информацию о боте\n"
                                          "\t/help - чтобы увидеть еще раз это сообщение\n"
                                          "P.S. некоторые команды допускают несколько " \
-                                         "вариантов написания, для более подробной информации" \
+                                         "вариантов написания, для более подробной информации " \
                                          "смотрите \'commands_tree\' в bot/core.py")
 
 
@@ -140,7 +140,7 @@ def delete_handler(message):
         db.del_user(message.from_user.id)
         tg_bot.send_message(message.chat.id, "Вас больше нет в базе данных")
     except:
-        tg_bot.send_message(message.chat.id, "Не удалось удалить, возможно вас нет в базе данных")
+        tg_bot.send_message(message.chat.id, "Не удалось удалить, возможно, вас нет в базе данных")
 
 
 #----------------
