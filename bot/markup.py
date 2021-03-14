@@ -20,8 +20,29 @@ def item_chooser_keyboard(mpt, items):
     
     return markup
 
-def group_choose_keyboard(a, b):
-    pass
+
+def main_menu_keyboard():
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=False,
+                                       one_time_keyboard=False,
+                                       row_width=3)
+    
+    # TODO:
+    # - настройки
+    # - обо мне
+    # - для другой группы
+    # - просмотр расписания сразу на сегодня/завтра/неделю
+    markup.add(
+                types.KeyboardButton("Расписание"),
+                types.KeyboardButton("Замены"),
+                types.KeyboardButton("Помощь")
+            )
+    markup.add(
+                types.KeyboardButton("Обо мне"),
+                types.KeyboardButton("О боте")
+            )
+
+    return markup
+
 
 def choose_schedule_date():
     markup = types.InlineKeyboardMarkup(row_width=3)

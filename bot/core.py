@@ -23,8 +23,8 @@ commands_tree = {
         "HELP": ("help", "/help", "помощь", "/помощь", "Помощь"),
         "PING": ("ping", "/ping", "Ping", "пинг", "Пинг"),
         "DEL": ("/del", "del", "delete", "/delete"),
-        "ABOUT": ("/about", "about", "About"),
-        "ME": ("/me", "/Me", "me", "Me")}
+        "ABOUT": ("/about", "about", "About", "О боте"),
+        "ME": ("/me", "/Me", "me", "Me", "Обо мне")}
 
 
 #----------------
@@ -48,6 +48,10 @@ def start_handler(message):
 
         new_user = users.user(message.from_user.id, message.from_user.first_name)
         db.add_user(new_user)
+    else:
+        tg_bot.send_message(message.chat.id, "Вы уже есть в базе данных",
+                            reply_markup=bot_markup.main_menu_keyboard())
+        
 
 
 #----------------
@@ -90,6 +94,8 @@ def answer_message_handler(message):
                 user.group = message.text
                 user.status = users.status.COMPLETE
                 db.update(user)
+                tg_bot.send_message(message.chat.id, "Вы успешно добавлены в бд",
+                                    reply_markup=bot_markup.main_menu_keyboard())
     else:
         tg_bot.send_message(message.chat.id, "Something went wrong")
 
@@ -126,6 +132,8 @@ def help_handler(message):
                         else False)
 def ping_handler(message):
     tg_bot.send_message(message.chat.id, "Еще здесь <3")
+    tg_bot.send_message(message.chat.id,
+                        reply_markup=bot_markup.main_menu_keyboard())
     
 
 #----------------
@@ -141,6 +149,8 @@ def delete_handler(message):
         tg_bot.send_message(message.chat.id, "Вас больше нет в базе данных")
     except:
         tg_bot.send_message(message.chat.id, "Не удалось удалить, возможно, вас нет в базе данных")
+    tg_bot.send_message(message.chat.id,
+                        reply_markup=bot_markup.main_menu_keyboard())
 
 
 #----------------
@@ -159,6 +169,8 @@ def about_handler(message):
                                          "В случае обнаружения ошибок, просьба сообщить, " \
                                          "создав issue \n" \
                                          "Чтобы увидеть список команд: /help")
+    tg_bot.send_message(message.chat.id,
+                        reply_markup=bot_markup.main_menu_keyboard())
 
 
 #----------------
@@ -179,6 +191,9 @@ def me_handler(message):
                                              f"Группа - {cur_user.group}")
     else:
         tg_bot.send_message(message.chat.id, "Вас еще нет в базе данных")
+    
+    tg_bot.send_message(message.chat.id,
+                        reply_markup=bot_markup.main_menu_keyboard())
 
 #----------------
 # Sending callback
@@ -202,7 +217,10 @@ def schedule_handler(message):
             cur_user.group = " ".join(message.text.split()[1:])
             cur_user.status = users.status.ANOTHER
             db.update(cur_user)
+    
     utils.schedule_date(message)
+    tg_bot.send_message(message.chat.id,
+                        reply_markup=bot_markup.main_menu_keyboard())
 
 
 #----------------
@@ -215,6 +233,8 @@ def schedule_handler(message):
 def callback_query(call):
     logging.debug("[" + str(call.message.from_user.id) + "] " + "Callback query received")
     utils.schedule_handler(call)
+    tg_bot.send_message(call.message.chat.id, "Test",
+                        reply_markup=bot_markup.main_menu_keyboard())
 
 
 #----------------
@@ -226,3 +246,5 @@ def callback_query(call):
 def changes_handler(message):
     logging.debug("[" + str(message.from_user.id) + "] " + "Changes command")
     utils.changes_handler(message)
+    tg_bot.send_message(message.chat.id,
+                        reply_markup=bot_markup.main_menu_keyboard())
