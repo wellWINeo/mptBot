@@ -209,8 +209,8 @@ class mptPage:
         Returns:
             matrix like this -> [[num1, name1, teacher1], [num2, name2, teacher2] ...]
         """
-        
-        bodies = resp = list()
+        bodies = []
+        resp = []
         day_num = 0
 
         try:
@@ -233,6 +233,8 @@ class mptPage:
             else:
                 if self.__checkTHead(bodies[i]):
                     day_num += 1
+        # Not found
+        return resp
 
 
     def __parse_lesson(self, arr):
