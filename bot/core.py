@@ -31,20 +31,21 @@ commands_tree = {
 # BOT FEATURES
 #----------------
 @tg_bot.message_handler(func=lambda message: 
-                        True if message.text in commands_tree["START"] 
+                        True if message.content_type == "text" and
+                        message.text in commands_tree["START"] 
                         else False)
 def start_handler(message):
-    logging.debug("[" + str(message.from_user.id) + "] " + "Bot received \"start\" command")
+    logging.debug(f"[{message.from_user.id}] Bot received \"start\" command")
     tg_bot.reply_to(message, "Привет, бот запущен!\nЕго цель - удобный просмотр "\
                              "расписания МПТ, а также он предупреждает о заменах.\n "\
                              "Для того чтобы узнать о комманда введите:\n " \
                              "/help")
-    logging.debug("[" + str(message.from_user.id) + "] " + "Initial answer on \"start\" command sent")
+    logging.debug(f"[{message.from_user.id}] Initial answer on \"start\" command sent")
     if db.get_user(message.from_user.id) is None:
-        logging.debug("[" + str(message.from_user.id) + "] " + "User not present in db")
+        logging.debug(f"[{message.from_user.id}] User not present in db")
         tg_bot.send_message(message.chat.id, "Выберите направление: ",
             reply_markup=bot_markup.direction_choose_keyboard())
-        logging.debug("[" + str(message.from_user.id) + "] " + "Bot send keyboard markup")
+        logging.debug(f"[{message.from_user.id}] Bot send keyboard markup")
 
         new_user = users.user(message.from_user.id, message.from_user.first_name)
         db.add_user(new_user)
@@ -98,7 +99,8 @@ def answer_message_handler(message):
 # HELP
 #----------------
 @tg_bot.message_handler(func=lambda message:
-                        True if message.text in commands_tree["HELP"]
+                        True if message.content_type == "text" and
+                        message.text in commands_tree["HELP"]
                         else False)
 def help_handler(message):
     logging.debug(f"[{message.from_user.id})] help command")
@@ -122,7 +124,8 @@ def help_handler(message):
 # PING
 #----------------
 @tg_bot.message_handler(func=lambda message:
-                        True if message.text in commands_tree["PING"]
+                        True if message.content_type == "text" and
+                        message.text in commands_tree["PING"]
                         else False)
 def ping_handler(message):
     tg_bot.send_message(message.chat.id, "Еще здесь <3")
@@ -133,7 +136,8 @@ def ping_handler(message):
 # user from db
 #----------------
 @tg_bot.message_handler(func=lambda message:
-                        True if message.text in commands_tree["DEL"]
+                        True if message.content_type == "text" and
+                        message.text in commands_tree["DEL"]
                         else False)
 def delete_handler(message):
     try:
@@ -147,7 +151,8 @@ def delete_handler(message):
 # ABOUT
 #----------------
 @tg_bot.message_handler(func=lambda message:
-                        True if message.text in commands_tree["ABOUT"]
+                        True if message.content_type == "text" and
+                        message.text in commands_tree["ABOUT"]
                         else False)
 def about_handler(message):
     logging.debug("Handling /about command")
@@ -166,7 +171,8 @@ def about_handler(message):
 # about user
 #----------------
 @tg_bot.message_handler(func=lambda message:
-                        True if message.text in commands_tree["ME"]
+                        True if message.content_type == "text" and 
+                        message.text in commands_tree["ME"]
                         else False)
 def me_handler(message):
     logging.debug("Handling /me command")
@@ -186,7 +192,8 @@ def me_handler(message):
 # choosing
 #----------------
 @tg_bot.message_handler(func=lambda message:
-                        True if message.text.split()[0] in commands_tree["SHEDULE"]
+                        True if message.content_type == "text" and
+                        message.text.split()[0] in commands_tree["SHEDULE"]
                         else False)
 def schedule_handler(message):
     logging.debug("[{message.from_user.id}] Shedule command")
@@ -213,7 +220,7 @@ def schedule_handler(message):
                                True if call.data[:3] == "cb_" 
                                else False)
 def callback_query(call):
-    logging.debug("[" + str(call.message.from_user.id) + "] " + "Callback query received")
+    logging.debug(f"[{call.message.from_user.id}] Callback query received")
     utils.schedule_handler(call)
 
 
@@ -224,5 +231,5 @@ def callback_query(call):
                         True if message.text in commands_tree["CHANGES"]
                         else False)
 def changes_handler(message):
-    logging.debug("[" + str(message.from_user.id) + "] " + "Changes command")
+    logging.debug(f"[{message.from_user.id}] Changes command")
     utils.changes_handler(message)
