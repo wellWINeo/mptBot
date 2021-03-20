@@ -48,9 +48,9 @@ class mptPage:
 
     def update(self):
         # Get
-        self.pageShedule = requests.get("https://mpt.ru/studentu/raspisanie-zanyatiy/") 
-        self.pageChanges = requests.get("https://mpt.ru/studentu/izmeneniya-v-raspisanii")
-
+        self.pageShedule = requests.get("https://www.mpt.ru/studentu/raspisanie-zanyatiy/") 
+        self.pageChanges = requests.get("https://www.mpt.ru/studentu/izmeneniya-v-raspisanii/")
+        
         # Parse
         self.pageShedule = bs4.BeautifulSoup(self.pageShedule.text, "html.parser")   
         self.pageChanges = bs4.BeautifulSoup(self.pageChanges.text, "html.parser").body.main
